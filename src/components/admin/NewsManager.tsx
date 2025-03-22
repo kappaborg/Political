@@ -10,7 +10,7 @@ type NewsItem = {
   id: string;
   slug: string;
   title: string;
-  excerpt: string;
+  summary: string;
   content: string;
   image: string;
   date: string;
@@ -35,7 +35,14 @@ export default function NewsManager() {
         }
         
         const data = await response.json();
-        setNewsItems(data);
+        
+        // API'den gelen veriyi dönüştür
+        const formattedNews = data.map((item: any) => ({
+          ...item,
+          summary: item.excerpt // excerpt -> summary dönüşümü
+        }));
+        
+        setNewsItems(formattedNews);
       } catch (error) {
         console.error('News fetch error:', error);
       } finally {
@@ -47,7 +54,10 @@ export default function NewsManager() {
   }, [locale]);
   
   const handleEdit = (newsItem: NewsItem) => {
-    setEditingItem(newsItem);
+    setEditingItem({
+      ...newsItem,
+      summary: newsItem.excerpt // excerpt -> summary dönüşümü
+    });
   };
   
   const handleCancel = () => {
@@ -63,12 +73,18 @@ export default function NewsManager() {
     if (editingItem) {
       // Update existing item
       setNewsItems(newsItems.map(item => 
-        item.id === savedItem.id ? savedItem : item
+        item.id === savedItem.id ? {
+          ...savedItem,
+          excerpt: savedItem.summary // summary -> excerpt dönüşümü
+        } : item
       ));
       setEditingItem(null);
     } else {
       // Add new item
-      setNewsItems([savedItem, ...newsItems]);
+      setNewsItems([{
+        ...savedItem,
+        excerpt: savedItem.summary // summary -> excerpt dönüşümü
+      }, ...newsItems]);
       setIsCreating(false);
     }
   };
@@ -90,9 +106,9 @@ export default function NewsManager() {
   if (isCreating || editingItem) {
     return (
       <NewsForm 
-        item={editingItem}
+        initialData={editingItem || undefined}
+        onSave={handleSaved}
         onCancel={handleCancel}
-        onSaved={handleSaved}
       />
     );
   }
