@@ -2,14 +2,21 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://username:password@cluster.mongodb.net/municipality?retryWrites=true&w=majority';
 
-declare global {
-  var mongoose: any;
+interface CachedConnection {
+  conn: any;
+  promise: Promise<any> | null;
 }
 
-let cached = global.mongoose;
+declare global {
+  var mongoose: CachedConnection | undefined;
+}
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Varsayılan initial değer ile başlatıyoruz
+let cached: CachedConnection = global.mongoose || { conn: null, promise: null };
+
+// Global değişkene atama yapıyoruz
+if (!global.mongoose) {
+  global.mongoose = cached;
 }
 
 export async function connectToDatabase() {
@@ -23,11 +30,11 @@ export async function connectToDatabase() {
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts)
-      .then((mongoose) => {
+      .then((mongooseInstance) => {
         console.log('Connected to MongoDB');
-        return mongoose;
+        return mongooseInstance;
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.error('MongoDB connection error:', error);
         throw error;
       });

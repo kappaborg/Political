@@ -1,8 +1,6 @@
-import { promises as fs } from 'fs';
+import connectToDatabase from '@/lib/mongodb';
+import Activity from '@/models/Activity';
 import { NextResponse } from 'next/server';
-import path from 'path';
-
-const dataFilePath = path.join(process.cwd(), 'data/json/activities.json');
 
 export async function GET(
   request: Request,
@@ -13,14 +11,11 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') || 'en';
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
     // İstenen dildeki aktiviteyi bul
-    const activity = (data[locale] || data.en || []).find(
-      (item: any) => item.slug === slug
-    );
+    const activity = await Activity.findOne({ slug, locale });
     
     if (!activity) {
       return NextResponse.json(

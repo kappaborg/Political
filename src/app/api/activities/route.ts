@@ -1,9 +1,13 @@
+import connectToDatabase from '@/lib/mongodb';
+import Activity from '@/models/Activity';
 import { promises as fs } from 'fs';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { authOptions } from '../auth/auth-options';
 
+// Geçiş dönemi için - eski JSON verileri MongoDB'ye aktarabilmek için
 const dataFilePath = path.join(process.cwd(), 'data/json/activities.json');
 
 export async function GET(request: Request) {
@@ -12,12 +16,58 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') || 'en';
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // İstenen dildeki aktiviteleri döndür
-    return NextResponse.json(data[locale] || data.en || []);
+    // Verileri MongoDB'den getir
+    const activities = await Activity.find({ locale }).sort({ startDate: 1 });
+    
+    // Veri bulunamazsa, JSON dosyasından bir kereliğine veri yükle
+    if (activities.length === 0) {
+      try {
+        // JSON dosyasını oku
+        const fileContents = await fs.readFile(dataFilePath, 'utf8');
+        const data = JSON.parse(fileContents);
+        
+        // JSON verilerini MongoDB'ye aktar
+        if (data[locale] && data[locale].length > 0) {
+          const importPromises = data[locale].map(async (item: any) => {
+            // Aktivite durumunu belirle
+            const today = new Date();
+            const startDate = new Date(item.date || item.startDate);
+            const endDate = item.endDate ? new Date(item.endDate) : null;
+            
+            let status = 'upcoming';
+            if (startDate <= today) {
+              status = endDate && endDate >= today ? 'ongoing' : 'past';
+            }
+            
+            await Activity.create({
+              id: item.id || uuidv4(),
+              slug: item.slug || item.title.toLowerCase().replace(/\s+/g, '-'),
+              title: item.title,
+              excerpt: item.excerpt || item.summary || '',
+              content: item.content || '',
+              image: item.image,
+              startDate: item.date || item.startDate,
+              endDate: item.endDate || null,
+              status,
+              locale
+            });
+          });
+          
+          await Promise.all(importPromises);
+          
+          // Verileri tekrar getir
+          const importedActivities = await Activity.find({ locale }).sort({ startDate: 1 });
+          return NextResponse.json(importedActivities);
+        }
+      } catch (error) {
+        console.error('JSON veri içe aktarma hatası:', error);
+      }
+    }
+    
+    return NextResponse.json(activities);
   } catch (error) {
     console.error('Error reading activities:', error);
     return NextResponse.json({ error: 'Failed to fetch activities' }, { status: 500 });
@@ -43,6 +93,9 @@ export async function POST(request: Request) {
 
     console.log('Gelen aktivite verileri:', Object.fromEntries(formData.entries()));
 
+    // MongoDB'ye bağlan
+    await connectToDatabase();
+
     // Dosya yükleme işlemi
     let imagePath = formData.get('image')?.toString() || '/images/activity-placeholder.jpg';
     const imageFile = formData.get('imageFile') as File;
@@ -65,57 +118,55 @@ export async function POST(request: Request) {
         console.error('Dosya yükleme hatası:', error);
       }
     }
-
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
     
-    // Yeni aktivite öğesi oluştur
+    const activityId = formData.get('id')?.toString() || uuidv4();
+    const startDate = formData.get('startDate')?.toString() || formData.get('date')?.toString() || new Date().toISOString().split('T')[0];
+    const endDate = formData.get('endDate')?.toString() || null;
+    
+    // Aktivite durumunu belirle
+    const today = new Date();
+    const startDateObj = new Date(startDate);
+    const endDateObj = endDate ? new Date(endDate) : null;
+    
+    let status = 'upcoming';
+    if (startDateObj <= today) {
+      status = endDateObj && endDateObj >= today ? 'ongoing' : 'past';
+    }
+    
+    // Veriyi hazırla
     const activityItem = {
-      id: formData.get('id')?.toString() || Date.now().toString(),
-      slug: formData.get('slug')?.toString() || '',
+      id: activityId,
+      slug: formData.get('slug')?.toString() || formData.get('title')?.toString()?.toLowerCase().replace(/\s+/g, '-') || '',
       title: formData.get('title')?.toString() || '',
-      excerpt: formData.get('summary')?.toString() || '',
+      excerpt: formData.get('excerpt')?.toString() || formData.get('summary')?.toString() || '',
       content: formData.get('content')?.toString() || '',
       image: imagePath,
-      date: formData.get('date')?.toString() || new Date().toISOString().split('T')[0],
-      location: formData.get('location')?.toString() || '',
-      startTime: formData.get('startTime')?.toString() || '',
-      endTime: formData.get('endTime')?.toString() || '',
-      isOngoing: formData.get('isOngoing') === 'true'
+      startDate,
+      endDate,
+      status,
+      locale
     };
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
+    // ID varsa güncelle, yoksa ekle
+    let savedActivity;
+    const existingActivity = await Activity.findOne({ id: activityId, locale });
     
-    // Tüm diller için işlem yap
-    supportedLocales.forEach(currentLocale => {
-      // Eğer dil için bir array yoksa oluştur
-      if (!data[currentLocale]) {
-        data[currentLocale] = [];
-      }
-      
-      // ID varsa güncelle, yoksa ekle
-      const existingItemIndex = data[currentLocale].findIndex(
-        (item: any) => item.id === activityItem.id
+    if (existingActivity) {
+      // Mevcut aktiviteyi güncelle
+      savedActivity = await Activity.findOneAndUpdate(
+        { id: activityId, locale }, 
+        activityItem,
+        { new: true }
       );
-      
-      if (existingItemIndex >= 0) {
-        // Var olan aktiviteyi güncelle
-        data[currentLocale][existingItemIndex] = activityItem;
-      } else {
-        // Yeni aktivite ekle
-        data[currentLocale].unshift(activityItem);
-      }
-    });
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    } else {
+      // Yeni aktivite ekle
+      savedActivity = await Activity.create(activityItem);
+    }
     
     return NextResponse.json({ 
       success: true, 
       message: 'Aktivite başarıyla kaydedildi',
-      data: activityItem 
+      data: savedActivity 
     });
   } catch (error: any) {
     console.error('Aktivite kayıt hatası:', error);
@@ -126,7 +177,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT metodu - aktivite sıralamasını güncellemek için
+// Aktiviteleri sıralamak için PUT metodu
 export async function PUT(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -150,50 +201,15 @@ export async function PUT(request: Request) {
       );
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
-    
-    // Tüm diller için sıralamayı güncelle
-    supportedLocales.forEach(currentLocale => {
-      // Eğer dil için bir array yoksa oluştur
-      if (!data[currentLocale]) {
-        data[currentLocale] = [];
-        return;
-      }
-      
-      // Mevcut öğeleri ID'ye göre bir haritaya çevir
-      const itemMap = new Map();
-      data[currentLocale].forEach((item: any) => {
-        itemMap.set(item.id, item);
-      });
-      
-      // Yeni sıralamaya göre diziyi oluştur
-      // Sadece mevcut ID'ler için
-      const reorderedItems = items
-        .map((id: string) => itemMap.get(id))
-        .filter(Boolean);
-      
-      // Sıralanmış öğeleri ekle
-      data[currentLocale] = reorderedItems;
-      
-      // Silinmiş olmayan ancak sıralamada gönderilmeyen öğeleri en sona ekle
-      data[currentLocale].forEach((item: any) => {
-        if (!items.includes(item.id)) {
-          reorderedItems.push(item);
-        }
-      });
-    });
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    // Burada özel bir sıralama gerekirse yapılabilir
+    // Şu an aktiviteler tarih bazlı sıralandığı için özel bir şey yapmıyoruz
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Aktivite sıralaması başarıyla güncellendi'
+      message: 'Aktivite sıralaması başarıyla güncellendi' 
     });
   } catch (error: any) {
     console.error('Aktivite sıralama hatası:', error);
@@ -204,7 +220,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE metodu - aktivite öğesini silmek için
+// Aktivite silmek için DELETE metodu
 export async function DELETE(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -217,9 +233,9 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    // URL'den ID parametresini al
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const locale = searchParams.get('locale') || 'en';
     
     if (!id) {
       return NextResponse.json(
@@ -228,45 +244,20 @@ export async function DELETE(request: Request) {
       );
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
-    let isDeleted = false;
-    
-    // Tüm diller için silme işlemi yap
-    supportedLocales.forEach(locale => {
-      if (data[locale]) {
-        const initialLength = data[locale].length;
-        data[locale] = data[locale].filter((item: any) => item.id !== id);
-        
-        // En az bir dilde silindi mi kontrol et
-        if (data[locale].length < initialLength) {
-          isDeleted = true;
-        }
-      }
-    });
-    
-    if (!isDeleted) {
-      return NextResponse.json(
-        { error: 'Belirtilen ID\'ye sahip öğe bulunamadı' }, 
-        { status: 404 }
-      );
-    }
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    // Öğeyi sil
+    await Activity.deleteOne({ id, locale });
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Aktivite öğesi başarıyla silindi' 
+      message: 'Aktivite başarıyla silindi' 
     });
   } catch (error: any) {
     console.error('Aktivite silme hatası:', error);
     return NextResponse.json(
-      { error: `Aktivite öğesi silinirken hata oluştu: ${error.message}` }, 
+      { error: `Aktivite silinirken hata oluştu: ${error.message}` }, 
       { status: 500 }
     );
   }

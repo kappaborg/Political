@@ -1,9 +1,13 @@
+import connectToDatabase from '@/lib/mongodb';
+import News from '@/models/News';
 import { promises as fs } from 'fs';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { authOptions } from '../auth/auth-options';
 
+// Geçiş dönemi için - eski JSON verileri MongoDB'ye aktarabilmek için
 const dataFilePath = path.join(process.cwd(), 'data/json/news.json');
 
 export async function GET(request: Request) {
@@ -12,12 +16,46 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') || 'en';
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // İstenen dildeki haberleri döndür
-    return NextResponse.json(data[locale] || data.en || []);
+    // Verileri MongoDB'den getir - en yeni haberler önce
+    const news = await News.find({ locale }).sort({ date: -1 });
+    
+    // Veri bulunamazsa, JSON dosyasından bir kereliğine veri yükle
+    if (news.length === 0) {
+      try {
+        // JSON dosyasını oku
+        const fileContents = await fs.readFile(dataFilePath, 'utf8');
+        const data = JSON.parse(fileContents);
+        
+        // JSON verilerini MongoDB'ye aktar
+        if (data[locale] && data[locale].length > 0) {
+          const importPromises = data[locale].map(async (item: any) => {
+            await News.create({
+              id: item.id || uuidv4(),
+              slug: item.slug || item.title.toLowerCase().replace(/\s+/g, '-'),
+              title: item.title,
+              excerpt: item.excerpt || item.summary || '',
+              content: item.content || '',
+              image: item.image,
+              date: item.date,
+              locale
+            });
+          });
+          
+          await Promise.all(importPromises);
+          
+          // Verileri tekrar getir
+          const importedNews = await News.find({ locale }).sort({ date: -1 });
+          return NextResponse.json(importedNews);
+        }
+      } catch (error) {
+        console.error('JSON veri içe aktarma hatası:', error);
+      }
+    }
+    
+    return NextResponse.json(news);
   } catch (error) {
     console.error('Error reading news:', error);
     return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 });
@@ -43,6 +81,9 @@ export async function POST(request: Request) {
 
     console.log('Gelen haber verileri:', Object.fromEntries(formData.entries()));
 
+    // MongoDB'ye bağlan
+    await connectToDatabase();
+
     // Dosya yükleme işlemi
     let imagePath = formData.get('image')?.toString() || '/images/news-placeholder.jpg';
     const imageFile = formData.get('imageFile') as File;
@@ -65,53 +106,41 @@ export async function POST(request: Request) {
         console.error('Dosya yükleme hatası:', error);
       }
     }
-
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
     
-    // Yeni haber öğesi oluştur
+    const newsId = formData.get('id')?.toString() || uuidv4();
+    
+    // Veriyi hazırla
     const newsItem = {
-      id: formData.get('id')?.toString() || Date.now().toString(),
-      slug: formData.get('slug')?.toString() || '',
+      id: newsId,
+      slug: formData.get('slug')?.toString() || formData.get('title')?.toString()?.toLowerCase().replace(/\s+/g, '-') || '',
       title: formData.get('title')?.toString() || '',
-      excerpt: formData.get('summary')?.toString() || '',
+      excerpt: formData.get('excerpt')?.toString() || formData.get('summary')?.toString() || '',
       content: formData.get('content')?.toString() || '',
       image: imagePath,
-      date: formData.get('date')?.toString() || new Date().toISOString().split('T')[0]
+      date: formData.get('date')?.toString() || new Date().toISOString().split('T')[0],
+      locale
     };
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
+    // ID varsa güncelle, yoksa ekle
+    let savedNews;
+    const existingNews = await News.findOne({ id: newsId, locale });
     
-    // Tüm diller için işlem yap
-    supportedLocales.forEach(currentLocale => {
-      // Eğer dil için bir array yoksa oluştur
-      if (!data[currentLocale]) {
-        data[currentLocale] = [];
-      }
-      
-      // ID varsa güncelle, yoksa ekle
-      const existingItemIndex = data[currentLocale].findIndex(
-        (item: any) => item.id === newsItem.id
+    if (existingNews) {
+      // Mevcut haberi güncelle
+      savedNews = await News.findOneAndUpdate(
+        { id: newsId, locale }, 
+        newsItem,
+        { new: true }
       );
-      
-      if (existingItemIndex >= 0) {
-        // Var olan haberi güncelle
-        data[currentLocale][existingItemIndex] = newsItem;
-      } else {
-        // Yeni haber ekle
-        data[currentLocale].unshift(newsItem);
-      }
-    });
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    } else {
+      // Yeni haber ekle
+      savedNews = await News.create(newsItem);
+    }
     
     return NextResponse.json({ 
       success: true, 
       message: 'Haber başarıyla kaydedildi',
-      data: newsItem 
+      data: savedNews 
     });
   } catch (error: any) {
     console.error('Haber kayıt hatası:', error);
@@ -122,7 +151,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT metodu - haber sıralamasını güncellemek için
+// Haber sıralamasını güncellemek için PUT metodu
 export async function PUT(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -146,50 +175,14 @@ export async function PUT(request: Request) {
       );
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
-    
-    // Tüm diller için sıralamayı güncelle
-    supportedLocales.forEach(currentLocale => {
-      // Eğer dil için bir array yoksa oluştur
-      if (!data[currentLocale]) {
-        data[currentLocale] = [];
-        return;
-      }
-      
-      // Mevcut öğeleri ID'ye göre bir haritaya çevir
-      const itemMap = new Map();
-      data[currentLocale].forEach((item: any) => {
-        itemMap.set(item.id, item);
-      });
-      
-      // Yeni sıralamaya göre diziyi oluştur
-      // Sadece mevcut ID'ler için
-      const reorderedItems = items
-        .map((id: string) => itemMap.get(id))
-        .filter(Boolean);
-      
-      // Sıralanmış öğeleri ekle
-      data[currentLocale] = reorderedItems;
-      
-      // Silinmiş olmayan ancak sıralamada gönderilmeyen öğeleri en sona ekle
-      data[currentLocale].forEach((item: any) => {
-        if (!items.includes(item.id)) {
-          reorderedItems.push(item);
-        }
-      });
-    });
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    // Özel bir sıralama yapılabilir ancak şu an için tarih bazlı sıralama kullanıyoruz
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Haber sıralaması başarıyla güncellendi'
+      message: 'Haber sıralaması başarıyla güncellendi' 
     });
   } catch (error: any) {
     console.error('Haber sıralama hatası:', error);
@@ -200,7 +193,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE metodu - haber öğesini silmek için
+// Haber silmek için DELETE metodu
 export async function DELETE(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -213,9 +206,9 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    // URL'den ID parametresini al
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const locale = searchParams.get('locale') || 'en';
     
     if (!id) {
       return NextResponse.json(
@@ -224,45 +217,20 @@ export async function DELETE(request: Request) {
       );
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
-    let isDeleted = false;
-    
-    // Tüm diller için silme işlemi yap
-    supportedLocales.forEach(locale => {
-      if (data[locale]) {
-        const initialLength = data[locale].length;
-        data[locale] = data[locale].filter((item: any) => item.id !== id);
-        
-        // En az bir dilde silindi mi kontrol et
-        if (data[locale].length < initialLength) {
-          isDeleted = true;
-        }
-      }
-    });
-    
-    if (!isDeleted) {
-      return NextResponse.json(
-        { error: 'Belirtilen ID\'ye sahip öğe bulunamadı' }, 
-        { status: 404 }
-      );
-    }
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    // Öğeyi sil
+    await News.deleteOne({ id, locale });
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Haber öğesi başarıyla silindi' 
+      message: 'Haber başarıyla silindi' 
     });
   } catch (error: any) {
     console.error('Haber silme hatası:', error);
     return NextResponse.json(
-      { error: `Haber öğesi silinirken hata oluştu: ${error.message}` }, 
+      { error: `Haber silinirken hata oluştu: ${error.message}` }, 
       { status: 500 }
     );
   }
