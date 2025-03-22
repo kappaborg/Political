@@ -230,24 +230,32 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     if (key.includes('.')) {
       const parts = key.split('.');
       let value: any = translations[locale];
-      let defaultValue: any = defaultTranslations;
       
+      // Navigate through each part of the key
       for (const part of parts) {
         if (!value || typeof value !== 'object') {
-          // Try to get from default language
-          for (const defaultPart of parts) {
-            if (!defaultValue || typeof defaultValue !== 'object') {
-              // console.warn(`Translation key not found: ${key}`);
-              return key;
-            }
-            defaultValue = defaultValue[defaultPart];
-          }
-          return defaultValue !== undefined ? defaultValue : key;
+          // If we can't navigate further, return the key
+          return key;
         }
         value = value[part];
       }
       
-      return value !== undefined ? value : key;
+      // If we found a value, return it
+      if (value !== undefined) {
+        return value;
+      }
+      
+      // If not found in current locale, try default locale
+      let defaultValue: any = defaultTranslations;
+      for (const part of parts) {
+        if (!defaultValue || typeof defaultValue !== 'object') {
+          // If we can't navigate further in default translations, return the key
+          return key;
+        }
+        defaultValue = defaultValue[part];
+      }
+      
+      return defaultValue !== undefined ? defaultValue : key;
     } else {
       const value = translations[locale][key as keyof typeof translations[typeof locale]];
       if (value === undefined) {
