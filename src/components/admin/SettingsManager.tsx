@@ -86,7 +86,7 @@ export default function SettingsManager() {
       setSettings((prev) => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof SiteSettings],
+          ...(prev[parent as keyof SiteSettings] as Record<string, string>),
           [child]: value,
         },
       }));
