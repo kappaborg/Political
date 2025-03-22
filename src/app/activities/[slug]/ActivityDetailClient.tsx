@@ -117,10 +117,10 @@ export default function ActivityDetailClient({ slug }: ActivityDetailClientProps
           ) : error ? (
             <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
               <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
-              <p className="text-gray-600 mb-6">{t('activities.errorMessage', 'İstediğiniz aktiviteye ulaşılamadı. Lütfen daha sonra tekrar deneyin veya tüm aktivitelere göz atın.')}</p>
+              <p className="text-gray-600 mb-6">{t('activities.errorMessage')}</p>
               <Link href="/activities" className="flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
                 <FiArrowLeft className="mr-2" />
-                {t('activities.backToList', 'Aktivitelere Dön')}
+                {t('activities.backToList')}
               </Link>
             </div>
           ) : activity ? (
@@ -134,7 +134,7 @@ export default function ActivityDetailClient({ slug }: ActivityDetailClientProps
               <div className="mb-6">
                 <Link href="/activities" className="flex items-center text-indigo-600 hover:text-indigo-800 font-medium">
                   <FiArrowLeft className="mr-2" />
-                  {t('activities.backToList', 'Tüm Aktivitelere Dön')}
+                  {t('activities.backToList')}
                 </Link>
               </div>
               
@@ -167,7 +167,7 @@ export default function ActivityDetailClient({ slug }: ActivityDetailClientProps
                   
                   {activity.isOngoing && (
                     <div className="absolute top-4 right-4 px-4 py-2 bg-green-500 text-white font-medium rounded-full">
-                      {t('activities.ongoing', 'Devam Ediyor')}
+                      {t('activities.ongoing')}
                     </div>
                   )}
                 </div>
@@ -213,7 +213,7 @@ export default function ActivityDetailClient({ slug }: ActivityDetailClientProps
               
               {/* Aktivite paylaşım linkleri (opsiyonel) */}
               <div className="mt-8 text-center">
-                <p className="text-gray-600 mb-2">{t('activities.shareActivity', 'Bu etkinliği paylaşın:')}</p>
+                <p className="text-gray-600 mb-2">{t('activities.shareActivity')}</p>
                 <div className="flex justify-center space-x-4">
                   {/* Sosyal medya paylaşım butonları eklenebilir */}
                 </div>
@@ -221,7 +221,7 @@ export default function ActivityDetailClient({ slug }: ActivityDetailClientProps
             </motion.div>
           ) : (
             <div className="text-center text-gray-500 py-10 bg-white rounded-lg shadow-sm">
-              {t('activities.activityNotFound', 'Aktivite bulunamadı.')}
+              {t('activities.activityNotFound')}
             </div>
           )}
         </div>

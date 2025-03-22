@@ -10,22 +10,22 @@ export default function MunicipalServices() {
   const services = [
     {
       id: 1,
-      title: t('highlights.services.title', 'Municipal Services'),
-      description: t('highlights.services.description', 'Access a wide range of municipal services including permits, registrations, and more'),
+      title: t('highlights.services.title'),
+      description: t('highlights.services.description'),
       icon: <FaBuilding size={48} className="text-blue-600" />,
       url: '/services'
     },
     {
       id: 2,
-      title: t('highlights.events.title', 'Event Calendar'),
-      description: t('highlights.events.description', 'Stay updated with local events, council meetings, and community gatherings'),
+      title: t('highlights.events.title'),
+      description: t('highlights.events.description'),
       icon: <FaCalendarAlt size={48} className="text-blue-600" />,
       url: '/events'
     },
     {
       id: 3,
-      title: t('highlights.projects.title', 'Development Projects'),
-      description: t('highlights.projects.description', 'Learn about ongoing and upcoming infrastructure and community development projects'),
+      title: t('highlights.projects.title'),
+      description: t('highlights.projects.description'),
       icon: <FaRoad size={48} className="text-blue-600" />,
       url: '/projects'
     }

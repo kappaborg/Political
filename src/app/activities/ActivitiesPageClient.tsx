@@ -136,7 +136,7 @@ export default function ActivitiesPageClient() {
           
           {activity.isOngoing && (
             <div className="absolute top-3 right-3 px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
-              {t('activities.ongoing', 'Devam Ediyor')}
+              {t('activities.ongoing')}
             </div>
           )}
         </div>
@@ -166,7 +166,7 @@ export default function ActivitiesPageClient() {
             )}
             
             <div className="flex items-center text-indigo-600 font-medium mt-2">
-              <span>{t('activities.readMore', 'Devamını Oku')}</span>
+              <span>{t('activities.readMore')}</span>
               <FiChevronRight className="ml-1" />
             </div>
           </div>
@@ -183,10 +183,10 @@ export default function ActivitiesPageClient() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto mb-8 text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
-              {t('activities.pageTitle', 'Etkinlikler')}
+              {t('activities.pageTitle')}
             </h1>
             <p className="text-gray-600">
-              {t('activities.pageDescription', 'Tüm etkinliklerimize göz atın ve katılın')}
+              {t('activities.pageDescription')}
             </p>
           </div>
           
@@ -196,7 +196,7 @@ export default function ActivitiesPageClient() {
             </div>
           ) : activities.length === 0 ? (
             <div className="text-center text-gray-500 py-10 bg-white rounded-lg shadow-sm">
-              {t('activities.noActivities', 'Şu anda hiç etkinlik bulunmamaktadır.')}
+              {t('activities.noActivities')}
             </div>
           ) : (
             <div className="space-y-16">
@@ -204,7 +204,7 @@ export default function ActivitiesPageClient() {
               {ongoingActivities.length > 0 && (
                 <section>
                   <h2 className="text-2xl font-bold mb-6 pb-2 border-b">
-                    {t('activities.ongoingActivities', 'Devam Eden Etkinlikler')}
+                    {t('activities.ongoingActivities')}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {ongoingActivities.map((activity, index) => renderActivityCard(activity, index))}
@@ -216,7 +216,7 @@ export default function ActivitiesPageClient() {
               {upcomingActivities.length > 0 && (
                 <section>
                   <h2 className="text-2xl font-bold mb-6 pb-2 border-b">
-                    {t('activities.upcomingActivities', 'Yaklaşan Etkinlikler')}
+                    {t('activities.upcomingActivities')}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {upcomingActivities.map((activity, index) => renderActivityCard(activity, index))}
@@ -228,7 +228,7 @@ export default function ActivitiesPageClient() {
               {pastActivities.length > 0 && (
                 <section>
                   <h2 className="text-2xl font-bold mb-6 pb-2 border-b">
-                    {t('activities.pastActivities', 'Geçmiş Etkinlikler')}
+                    {t('activities.pastActivities')}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {pastActivities.slice(0, 6).map((activity, index) => renderActivityCard(activity, index))}
@@ -241,10 +241,10 @@ export default function ActivitiesPageClient() {
                         onClick={() => {
                           // Buraya tıklandığında daha fazla geçmiş etkinlik gösterme mantığı eklenebilir
                           // Şimdilik basit bir alert
-                          alert(t('activities.moreActivitiesSoon', 'Daha fazla etkinlik yakında eklenecek'));
+                          alert(t('activities.moreActivitiesSoon'));
                         }}
                       >
-                        {t('activities.loadMore', 'Daha Fazla Göster')}
+                        {t('activities.loadMore')}
                       </button>
                     </div>
                   )}

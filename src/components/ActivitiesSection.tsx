@@ -96,9 +96,9 @@ export default function ActivitiesSection() {
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold">{t('activities.title', 'Etkinlikler')}</h2>
+          <h2 className="text-3xl font-bold">{t('activities.title')}</h2>
           <p className="text-gray-600 mt-2">
-            {t('activities.subtitle', 'Yaklaşan ve devam eden etkinliklerimiz')}
+            {t('activities.subtitle')}
           </p>
         </div>
 
@@ -108,7 +108,7 @@ export default function ActivitiesSection() {
           </div>
         ) : activities.length === 0 ? (
           <div className="text-center text-gray-500 py-10">
-            {t('activities.noActivities', 'Şu anda hiç etkinlik bulunmamaktadır.')}
+            {t('activities.noActivities')}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -146,7 +146,7 @@ export default function ActivitiesSection() {
                     
                     {activity.isOngoing && (
                       <div className="absolute top-3 right-3 px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
-                        {t('activities.ongoing', 'Devam Ediyor')}
+                        {t('activities.ongoing')}
                       </div>
                     )}
                   </div>
@@ -190,7 +190,7 @@ export default function ActivitiesSection() {
               href="/activities"
               className="px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors inline-block"
             >
-              {t('activities.viewAll', 'Tüm Etkinlikleri Görüntüle')}
+              {t('activities.viewAll')}
             </Link>
           </div>
         )}
