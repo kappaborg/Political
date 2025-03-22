@@ -7,7 +7,7 @@ type Locale = 'en' | 'bs';
 interface TranslationContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string) => any;
 }
 
 const translations = {
@@ -202,8 +202,26 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('locale', newLocale);
   };
 
-  const t = (key: string): string => {
-    return translations[locale][key as keyof typeof translations[typeof locale]] || key;
+  const t = (key: string): any => {
+    if (key.includes('.')) {
+      const parts = key.split('.');
+      let value: any = translations[locale];
+      
+      for (const part of parts) {
+        if (!value || typeof value !== 'object') {
+          return key;
+        }
+        value = value[part];
+        if (value === undefined) {
+          return key;
+        }
+      }
+      
+      return value;
+    } else {
+      const value = translations[locale][key as keyof typeof translations[typeof locale]];
+      return value !== undefined ? value : key;
+    }
   };
 
   // Only render content once we're on the client to avoid hydration mismatch
