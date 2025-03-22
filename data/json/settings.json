@@ -1,0 +1,34 @@
+{
+  "en": {
+    "siteName": "Municipality Portal",
+    "siteDescription": "Official website of the Municipality.",
+    "contactEmail": "demo@gmail.com",
+    "contactPhone": "+387 603445855",
+    "address": "мир",
+    "socialMedia": {
+      "facebook": "https://facebook.com/municipality",
+      "twitter": "https://twitter.com/municipality",
+      "instagram": "https://instagram.com/kappasutra",
+      "youtube": "https://youtube.com/municipality"
+    },
+    "logo": "/images/logo-placeholder.png",
+    "primaryColor": "#2563eb",
+    "accentColor": "#0891b2"
+  },
+  "bs": {
+    "siteName": "Portal Općine",
+    "siteDescription": "Službena web stranica Općine.",
+    "contactEmail": "ozansmet@example.com",
+    "contactPhone": "+387 603445855",
+    "address": "Ramiza",
+    "socialMedia": {
+      "facebook": "https://facebook.com/municipality",
+      "twitter": "https://twitter.com/municipality",
+      "instagram": "https://instagram.com/kappasutra",
+      "youtube": "https://youtube.com/municipality"
+    },
+    "logo": "/images/logo-placeholder.png",
+    "primaryColor": "#2563eb",
+    "accentColor": "#0891b2"
+  }
+}

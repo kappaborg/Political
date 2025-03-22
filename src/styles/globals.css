@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 243, 244, 246;
+  --primary-color: #1a73e8;
+  --accent-color: #ff6b3d;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: 'Inter', sans-serif;
+}
+
+.shadow-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 300px;
+}
+
+.carousel-item {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-item.active {
+  opacity: 1;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+  color: var(--accent-color);
+}
+
+.carousel-prev {
+  left: 20px;
+}
+
+.carousel-next {
+  right: 20px;
+}
+
+.highlight-tab {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid transparent;
+}
+
+.highlight-tab.active {
+  border-bottom: 2px solid var(--accent-color);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors shadow-md;
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section {
+    @apply py-12;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply transform hover:-translate-y-1 transition-transform duration-300;
+  }
+
+  .btn-accent {
+    @apply bg-accent hover:bg-accent/90 text-white py-2 px-4 rounded-lg transition-colors shadow-md;
+  }
+
+  .heading-underline {
+    @apply relative pb-2;
+  }
+
+  .heading-underline::after {
+    @apply content-[''] absolute bottom-0 left-0 w-24 h-1 bg-accent;
+  }
+} 

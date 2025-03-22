@@ -1,0 +1,58 @@
+{
+  "en": [
+    {
+      "id": "1",
+      "image": "/images/municipality-1.jpg",
+      "title": "Welcome to the Municipality Portal",
+      "description": "Your central hub for community information and services."
+    },
+    {
+      "id": "1742614132383",
+      "title": "Lightning ",
+      "subtitle": "95",
+      "image": "/images/carousel-1742614132337-IMG_1062.png",
+      "buttonText": "",
+      "buttonLink": "#"
+    },
+    {
+      "id": "2",
+      "image": "/images/municipality-2.jpg",
+      "title": "Serving Our Community",
+      "description": "Committed to improving the quality of life in our municipality."
+    },
+    {
+      "id": "3",
+      "image": "/images/municipality-3.jpg",
+      "title": "Discover Local Events",
+      "description": "Stay updated with the latest happenings in our community."
+    }
+  ],
+  "bs": [
+    {
+      "id": "1",
+      "image": "/images/municipality-1.jpg",
+      "title": "Dobrodošli na portal Općine",
+      "description": "Vaše centralno mjesto za informacije i usluge zajednice."
+    },
+    {
+      "id": "1742614132383",
+      "title": "Lightning ",
+      "subtitle": "95",
+      "image": "/images/carousel-1742614132337-IMG_1062.png",
+      "buttonText": "",
+      "buttonLink": "#"
+    },
+    {
+      "id": "2",
+      "image": "/images/municipality-2.jpg",
+      "title": "U službi naše zajednice",
+      "description": "Posvećeni poboljšanju kvalitete života u našoj općini."
+    },
+    {
+      "id": "3",
+      "image": "/images/municipality-3.jpg",
+      "title": "Otkrijte lokalne događaje",
+      "description": "Budite u toku s najnovijim dešavanjima u našoj zajednici."
+    }
+  ]
+}

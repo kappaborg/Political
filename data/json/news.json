@@ -1,0 +1,78 @@
+{
+  "en": [
+    {
+      "id": "1742614156884",
+      "slug": "demo-news",
+      "title": "DEMO News",
+      "excerpt": "NEWS",
+      "content": "SO NEW",
+      "image": "/images/news-1742614156860-IMG_1064.jpeg",
+      "date": "2025-03-22"
+    },
+    {
+      "id": "1",
+      "slug": "new-public-park-opening",
+      "title": "New Public Park Opening in Alipašino Polje",
+      "excerpt": "The Municipality of Novi Grad Sarajevo is pleased to announce the opening of a new public park in Alipašino Polje district, providing a green space for community recreation and leisure.",
+      "content": "<p>The Municipality of Novi Grad Sarajevo is pleased to announce the grand opening of a new public park in the Alipašino Polje district. This new green space spans over 2.5 hectares and has been designed to provide residents with a modern recreational area that enhances the quality of urban life.</p><p>The park features:</p><ul><li>Children's playground with safe, modern equipment</li><li>Walking paths with energy-efficient lighting</li><li>Dedicated cycling lanes</li><li>Outdoor fitness area</li><li>Seating areas and picnic spots</li><li>Water features and landscaped gardens</li></ul><p>Mayor Dževad Bećirević will officially inaugurate the park on Saturday, June 10th, 2023, at 11:00 AM. The opening ceremony will include cultural performances, activities for children, and refreshments.</p><p>\"This park represents our commitment to creating sustainable urban environments that promote community well-being and environmental stewardship,\" said Mayor Bećirević. \"We've incorporated innovative design elements that make this space accessible to residents of all ages and abilities.\"</p><p>The project, funded through the municipality's urban development budget with support from the Sarajevo Canton, was completed ahead of schedule and within the allocated budget.</p><p>Residents are encouraged to attend the opening ceremony and explore the new facilities. The park will be open daily from 6:00 AM to 11:00 PM.</p>",
+      "image": "/images/news-1.jpg",
+      "date": "June 5, 2023"
+    },
+    {
+      "id": "2",
+      "slug": "infrastructure-improvement-project",
+      "title": "Infrastructure Improvement Project Launches in Dobrinja",
+      "excerpt": "A comprehensive infrastructure upgrade project has been initiated in the Dobrinja neighborhood, focusing on road repairs, water supply system modernization, and public lighting enhancements.",
+      "content": "<p>The Municipality of Novi Grad Sarajevo announces the commencement of a major infrastructure improvement project in the Dobrinja neighborhood. This comprehensive initiative aims to address long-standing infrastructure needs and enhance the quality of life for residents.</p><p>The project encompasses:</p><ul><li>Complete resurfacing of major roads and side streets</li><li>Modernization of the water supply network to prevent leakages and improve water quality</li><li>Installation of energy-efficient LED street lighting</li><li>Upgrading of the stormwater drainage system to prevent flooding</li><li>Renovation of sidewalks with accessibility features for people with disabilities</li></ul><p>Construction work will begin on July 15, 2023, and is scheduled to be completed within eight months. The project will be implemented in phases to minimize disruption to residents and businesses in the area.</p><p>\"This project represents a significant investment in our community's future,\" explained Amra Hadžiahmetović, Head of the Municipal Department for Urban Development. \"We're not just fixing what's broken; we're building infrastructure that will serve our residents reliably for decades to come.\"</p><p>The municipality has established a dedicated information center at the Dobrinja Community Center, where residents can learn more about the project timeline, temporary traffic arrangements, and planned service interruptions. Additionally, a hotline (033-291-234) has been set up for questions and concerns.</p><p>Information sessions for residents will be held on:</p><ul><li>July 3, 2023, at 6:00 PM - Dobrinja Community Center</li><li>July 5, 2023, at 6:00 PM - Dobrinja Elementary School</li></ul><p>This 4.2 million KM project is funded through a combination of municipal resources and a development grant from the European Bank for Reconstruction and Development (EBRD).</p>",
+      "image": "/images/news-2.jpg",
+      "date": "July 1, 2023"
+    },
+    {
+      "id": "3",
+      "slug": "digital-services-expansion",
+      "title": "Digital Services Expansion for Residents",
+      "excerpt": "The municipality is launching new digital services allowing residents to request documents, schedule appointments, and report issues online, making administrative processes more efficient and accessible.",
+      "content": "<p>The Municipality of Novi Grad Sarajevo is proud to announce a significant expansion of its digital services platform, designed to streamline administrative processes and make municipal services more accessible to residents.</p><p>Starting August 1, 2023, residents will be able to access the following services online:</p><ul><li>Request and download official certificates and documents</li><li>Schedule appointments with municipal departments</li><li>Submit building permit applications and track their status</li><li>Report infrastructure issues (road damage, streetlight outages, etc.)</li><li>Pay municipal taxes and fees</li><li>Access public records and municipal decisions</li></ul><p>The new platform, accessible via both website and mobile app, features secure authentication through the national eID system and includes options for digital signatures on official documents.</p><p>\"This digital transformation initiative reflects our commitment to responsive, efficient governance,\" said Emir Dedić, Chief Digital Officer of the municipality. \"By moving these services online, we're saving our residents time and making administrative processes more transparent.\"</p><p>To assist residents in using the new digital platform, the municipality will offer free training sessions at the following locations:</p><ul><li>Municipal Building - Information Desk (weekdays, 9:00 AM - 5:00 PM)</li><li>Novi Grad Public Library (Tuesdays and Thursdays, 2:00 PM - 6:00 PM)</li><li>Alipašino Polje Community Center (Mondays and Wednesdays, 3:00 PM - 7:00 PM)</li></ul><p>Special assistance will be provided for elderly residents and those with limited digital literacy. Additionally, public computer terminals with staff support will be available at the Municipal Service Center for residents without internet access.</p><p>The development of this digital platform was supported by the UNDP's Digital Transformation Program and represents an investment of 850,000 KM in technology infrastructure and software development.</p><p>For more information, residents can visit <a href=\"http://www.novigradsarajevo.ba/digital\">www.novigradsarajevo.ba/digital</a> or call the Digital Services hotline at 033-291-555.</p>",
+      "image": "/images/news-3.jpg",
+      "date": "July 25, 2023"
+    }
+  ],
+  "bs": [
+    {
+      "id": "1742614156884",
+      "slug": "demo-news",
+      "title": "DEMO News",
+      "excerpt": "NEWS",
+      "content": "SO NEW",
+      "image": "/images/news-1742614156860-IMG_1064.jpeg",
+      "date": "2025-03-22"
+    },
+    {
+      "id": "1",
+      "slug": "otvaranje-novog-javnog-parka",
+      "title": "Otvaranje novog javnog parka u Alipašinom Polju",
+      "excerpt": "Općina Novi Grad Sarajevo s ponosom najavljuje otvaranje novog javnog parka u naselju Alipašino Polje, pružajući zelenu površinu za rekreaciju i odmor zajednice.",
+      "content": "<p>Općina Novi Grad Sarajevo s ponosom najavljuje svečano otvaranje novog javnog parka u naselju Alipašino Polje. Ovaj novi zeleni prostor prostire se na više od 2,5 hektara i dizajniran je da stanovnicima pruži moderan rekreacijski prostor koji poboljšava kvalitet urbanog života.</p><p>Park uključuje:</p><ul><li>Dječje igralište sa sigurnom, modernom opremom</li><li>Staze za šetnju s energetski efikasnom rasvjetom</li><li>Namjenske biciklističke staze</li><li>Prostor za vježbanje na otvorenom</li><li>Prostori za sjedenje i piknik</li><li>Vodene površine i uređeni vrtovi</li></ul><p>Načelnik Dževad Bećirević će službeno otvoriti park u subotu, 10. juna 2023. godine u 11:00 sati. Ceremonija otvaranja će uključivati kulturne nastupe, aktivnosti za djecu i osvježenja.</p><p>\"Ovaj park predstavlja našu predanost stvaranju održivih urbanih okruženja koja promoviraju dobrobit zajednice i očuvanje okoliša,\" rekao je načelnik Bećirević. \"Ugradili smo inovativne elemente dizajna koji ovaj prostor čine pristupačnim stanovnicima svih uzrasta i sposobnosti.\"</p><p>Projekat, financiran kroz općinski budžet za urbani razvoj uz podršku Kantona Sarajevo, dovršen je prije predviđenog roka i unutar predviđenog budžeta.</p><p>Stanovnici se pozivaju da prisustvuju ceremoniji otvaranja i istraže nove sadržaje. Park će biti otvoren svakodnevno od 6:00 do 23:00 sata.</p>",
+      "image": "/images/news-1.jpg",
+      "date": "5. juni 2023."
+    },
+    {
+      "id": "2",
+      "slug": "projekat-poboljsanja-infrastrukture",
+      "title": "Projekat poboljšanja infrastrukture pokrenut u Dobrinji",
+      "excerpt": "Pokrenut je sveobuhvatni projekat nadogradnje infrastrukture u naselju Dobrinja, s fokusom na popravke puteva, modernizaciju sistema vodosnabdijevanja i poboljšanja javne rasvjete.",
+      "content": "<p>Općina Novi Grad Sarajevo najavljuje početak velikog projekta poboljšanja infrastrukture u naselju Dobrinja. Ova sveobuhvatna inicijativa ima za cilj da odgovori na dugogodišnje infrastrukturne potrebe i poboljša kvalitet života stanovnika.</p><p>Projekat obuhvata:</p><ul><li>Potpuno presvlačenje glavnih cesta i sporednih ulica</li><li>Modernizaciju mreže vodosnabdijevanja za sprečavanje curenja i poboljšanje kvaliteta vode</li><li>Instalaciju energetski efikasne LED ulične rasvjete</li><li>Nadogradnju sistema odvodnje oborinskih voda za sprečavanje poplava</li><li>Renoviranje trotoara s funkcijama pristupačnosti za osobe s invaliditetom</li></ul><p>Građevinski radovi će početi 15. jula 2023. godine i planirano je da budu završeni u roku od osam mjeseci. Projekat će biti implementiran u fazama kako bi se minimalno poremetio život stanovnika i poslovanje u tom području.</p><p>\"Ovaj projekat predstavlja značajnu investiciju u budućnost naše zajednice,\" objasnila je Amra Hadžiahmetović, šefica Općinskog odjela za urbani razvoj. \"Ne popravljamo samo ono što je pokvareno; gradimo infrastrukturu koja će pouzdano služiti našim stanovnicima decenijama koje dolaze.\"</p><p>Općina je uspostavila poseban informacioni centar u Društvenom centru Dobrinja, gdje stanovnici mogu saznati više o vremenskom okviru projekta, privremenim saobraćajnim aranžmanima i planiranim prekidima usluga. Dodatno, uspostavljena je telefonska linija (033-291-234) za pitanja i zabrinutosti.</p><p>Informativne sesije za stanovnike će se održati:</p><ul><li>3. jula 2023. u 18:00 sati - Društveni centar Dobrinja</li><li>5. jula 2023. u 18:00 sati - Osnovna škola Dobrinja</li></ul><p>Ovaj projekat vrijedan 4,2 miliona KM finansira se kombinacijom općinskih resursa i razvojnog granta Evropske banke za obnovu i razvoj (EBRD).</p>",
+      "image": "/images/news-2.jpg",
+      "date": "1. juli 2023."
+    },
+    {
+      "id": "3",
+      "slug": "prosirenje-digitalnih-usluga",
+      "title": "Proširenje digitalnih usluga za stanovnike",
+      "excerpt": "Općina pokreće nove digitalne usluge koje omogućavaju stanovnicima da zatraže dokumente, zakažu termine i prijave probleme online, čineći administrativne procese efikasnijim i pristupačnijim.",
+      "content": "<p>Općina Novi Grad Sarajevo s ponosom najavljuje značajno proširenje svoje platforme digitalnih usluga, dizajnirane da pojednostavi administrativne procese i učini općinske usluge pristupačnijim stanovnicima.</p><p>Od 1. augusta 2023. godine, stanovnici će moći pristupiti sljedećim uslugama online:</p><ul><li>Zatražiti i preuzeti službene potvrde i dokumente</li><li>Zakazati termine s općinskim odjelima</li><li>Predati zahtjeve za građevinske dozvole i pratiti njihov status</li><li>Prijaviti infrastrukturne probleme (oštećenja cesta, kvarove ulične rasvjete, itd.)</li><li>Platiti općinske poreze i naknade</li><li>Pristupiti javnim zapisima i općinskim odlukama</li></ul><p>Nova platforma, dostupna putem web stranice i mobilne aplikacije, sadrži sigurnu autentifikaciju kroz nacionalni eID sistem i uključuje opcije za digitalne potpise na službenim dokumentima.</p><p>\"Ova inicijativa digitalne transformacije odražava našu predanost odgovornom, efikasnom upravljanju,\" rekao je Emir Dedić, glavni digitalni službenik općine. \"Prebacivanjem ovih usluga online, štedimo vrijeme našim stanovnicima i činimo administrativne procese transparentnijim.\"</p><p>Da bi pomogli stanovnicima u korištenju nove digitalne platforme, općina će ponuditi besplatne sesije obuke na sljedećim lokacijama:</p><ul><li>Zgrada Općine - Informacioni pult (radnim danima, 9:00 - 17:00 sati)</li><li>Javna biblioteka Novi Grad (utorkom i četvrtkom, 14:00 - 18:00 sati)</li><li>Društveni centar Alipašino Polje (ponedjeljkom i srijedom, 15:00 - 19:00 sati)</li></ul><p>Posebna pomoć će biti pružena starijim stanovnicima i onima s ograničenom digitalnom pismenošću. Dodatno, javni računarski terminali s podrškom osoblja bit će dostupni u Centru za usluge građanima za stanovnike bez pristupa internetu.</p><p>Razvoj ove digitalne platforme podržan je UNDP-ovim Programom digitalne transformacije i predstavlja investiciju od 850.000 KM u tehnološku infrastrukturu i razvoj softvera.</p><p>Za više informacija, stanovnici mogu posjetiti <a href=\"http://www.novigradsarajevo.ba/digitalno\">www.novigradsarajevo.ba/digitalno</a> ili nazvati telefonsku liniju za digitalne usluge na 033-291-555.</p>",
+      "image": "/images/news-3.jpg",
+      "date": "25. juli 2023."
+    }
+  ]
+}
