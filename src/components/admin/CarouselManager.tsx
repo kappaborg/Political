@@ -23,6 +23,11 @@ export default function CarouselManager() {
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Get current locale from URL
+  const locale = typeof window !== 'undefined' 
+    ? new URLSearchParams(window.location.search).get('locale') || 'en'
+    : 'en';
+  
   const [formData, setFormData] = useState<Omit<CarouselSlide, 'id'> & { id?: string }>({
     title: '',
     subtitle: '',
@@ -41,8 +46,6 @@ export default function CarouselManager() {
     const fetchCarouselData = async () => {
       try {
         setLoading(true);
-        // Get current locale from URL or default to 'en'
-        const locale = new URLSearchParams(window.location.search).get('locale') || 'en';
         
         const response = await fetch(`/api/carousel?locale=${locale}`);
         if (!response.ok) {
@@ -50,17 +53,28 @@ export default function CarouselManager() {
         }
         
         const data = await response.json();
-        setSlides(data);
+        
+        // API'den gelen verileri CarouselSlide formatına dönüştür
+        const formattedSlides: CarouselSlide[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          subtitle: item.subtitle,
+          image: item.image,
+          buttonText: item.buttonText || '',
+          buttonLink: item.buttonLink || '#'
+        }));
+        
+        setSlides(formattedSlides);
       } catch (error) {
         console.error('Error loading carousel data:', error);
-        toast.error('Carousel verileri yüklenirken hata oluştu');
+        toast.error('Slayt verileri yüklenirken hata oluştu');
       } finally {
         setLoading(false);
       }
     };
     
     fetchCarouselData();
-  }, []);
+  }, [locale]);
 
   const handleStartEdit = (slide: CarouselSlide) => {
     setEditingSlide(slide);
