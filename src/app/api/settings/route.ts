@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import path from 'path';
-import { getAuthOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../auth/auth-options';
 
 const dataFilePath = path.join(process.cwd(), 'data/json/settings.json');
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   // Kimlik doğrulama kontrolü
-  const session = await getServerSession(getAuthOptions());
+  const session = await getServerSession(authOptions);
   
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json(
