@@ -25,11 +25,16 @@ export default function LoginForm() {
       setIsLoading(true);
       setError(null);
       
+      console.log('Signing in with credentials:', { username, password });
+      
       const result = await signIn('credentials', {
         redirect: false,
         username,
         password,
+        callbackUrl: '/admin/dashboard'
       });
+      
+      console.log('SignIn result:', result);
       
       if (result?.error) {
         setError('Invalid username or password');
@@ -38,8 +43,10 @@ export default function LoginForm() {
       }
       
       // Success - redirect to dashboard
+      console.log('Login successful, redirecting to dashboard');
       router.push('/admin/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
