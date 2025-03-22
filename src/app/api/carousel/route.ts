@@ -1,29 +1,69 @@
+import connectToDatabase from '@/lib/mongodb';
+import Carousel from '@/models/Carousel';
 import { promises as fs } from 'fs';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { authOptions } from '../auth/auth-options';
 
+// Geçiş dönemi için - eski JSON verileri MongoDB'ye aktarabilmek için
 const dataFilePath = path.join(process.cwd(), 'data/json/carousel.json');
 
+// Carousel verilerini getir
 export async function GET(request: Request) {
   try {
     // URL'den locale parametresini al
     const { searchParams } = new URL(request.url);
     const locale = searchParams.get('locale') || 'en';
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // İstenen dildeki carousel öğelerini döndür
-    return NextResponse.json(data[locale] || data.en || []);
+    // Verileri MongoDB'den getir
+    const slides = await Carousel.find({ locale }).sort({ order: 1 });
+    
+    // Veri bulunamazsa, JSON dosyasından bir kereliğine veri yükle
+    if (slides.length === 0) {
+      try {
+        // JSON dosyasını oku
+        const fileContents = await fs.readFile(dataFilePath, 'utf8');
+        const data = JSON.parse(fileContents);
+        
+        // JSON verilerini MongoDB'ye aktar
+        if (data[locale] && data[locale].length > 0) {
+          const importPromises = data[locale].map(async (item: any, index: number) => {
+            await Carousel.create({
+              id: item.id || uuidv4(),
+              title: item.title,
+              subtitle: item.subtitle,
+              image: item.image,
+              buttonText: item.buttonText || '',
+              buttonLink: item.buttonLink || '#',
+              locale,
+              order: index
+            });
+          });
+          
+          await Promise.all(importPromises);
+          
+          // Verileri tekrar getir
+          const importedSlides = await Carousel.find({ locale }).sort({ order: 1 });
+          return NextResponse.json(importedSlides);
+        }
+      } catch (error) {
+        console.error('JSON veri içe aktarma hatası:', error);
+      }
+    }
+    
+    return NextResponse.json(slides);
   } catch (error) {
     console.error('Error reading carousel data:', error);
     return NextResponse.json({ error: 'Failed to fetch carousel data' }, { status: 500 });
   }
 }
 
+// Yeni Carousel verisi ekle veya mevcut olanı güncelle
 export async function POST(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -42,6 +82,9 @@ export async function POST(request: Request) {
     const locale = searchParams.get('locale') || 'en';
 
     console.log('Gelen carousel verileri:', Object.fromEntries(formData.entries()));
+
+    // MongoDB'ye bağlan
+    await connectToDatabase();
 
     // Dosya yükleme işlemi
     let imagePath = formData.get('image')?.toString() || '/images/carousel-placeholder.jpg';
@@ -66,51 +109,46 @@ export async function POST(request: Request) {
       }
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    const slideId = formData.get('id')?.toString() || uuidv4();
     
-    // Yeni carousel öğesi oluştur
+    // Veriyi hazırla
     const carouselItem = {
-      id: formData.get('id')?.toString() || Date.now().toString(),
+      id: slideId,
       title: formData.get('title')?.toString() || '',
       subtitle: formData.get('subtitle')?.toString() || '',
       image: imagePath,
       buttonText: formData.get('buttonText')?.toString() || '',
-      buttonLink: formData.get('buttonLink')?.toString() || '#'
+      buttonLink: formData.get('buttonLink')?.toString() || '#',
+      locale
     };
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
+    // ID varsa güncelle, yoksa ekle
+    let savedSlide;
+    const existingSlide = await Carousel.findOne({ id: slideId, locale });
     
-    // Tüm diller için işlem yap
-    supportedLocales.forEach(currentLocale => {
-      // Eğer dil için bir array yoksa oluştur
-      if (!data[currentLocale]) {
-        data[currentLocale] = [];
-      }
-      
-      // ID varsa güncelle, yoksa ekle
-      const existingItemIndex = data[currentLocale].findIndex(
-        (item: any) => item.id === carouselItem.id
+    if (existingSlide) {
+      // Mevcut slide'ı güncelle
+      savedSlide = await Carousel.findOneAndUpdate(
+        { id: slideId, locale }, 
+        carouselItem,
+        { new: true }
       );
+    } else {
+      // Son sırayı bul
+      const lastSlide = await Carousel.findOne({ locale }).sort({ order: -1 });
+      const order = lastSlide ? lastSlide.order + 1 : 0;
       
-      if (existingItemIndex >= 0) {
-        // Var olan öğeyi güncelle
-        data[currentLocale][existingItemIndex] = carouselItem;
-      } else {
-        // Yeni öğe ekle
-        data[currentLocale].push(carouselItem);
-      }
-    });
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+      // Yeni slide ekle
+      savedSlide = await Carousel.create({
+        ...carouselItem,
+        order
+      });
+    }
     
     return NextResponse.json({ 
       success: true, 
       message: 'Carousel öğesi başarıyla kaydedildi',
-      data: carouselItem 
+      data: savedSlide 
     });
   } catch (error: any) {
     console.error('Carousel kayıt hatası:', error);
@@ -121,7 +159,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT metodu - carousel sıralamasını güncellemek için
+// Carousel sıralamasını güncelle
 export async function PUT(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -145,50 +183,20 @@ export async function PUT(request: Request) {
       );
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
-    
-    // Tüm diller için sıralamayı güncelle
-    supportedLocales.forEach(currentLocale => {
-      // Eğer dil için bir array yoksa oluştur
-      if (!data[currentLocale]) {
-        data[currentLocale] = [];
-        return;
-      }
-      
-      // Mevcut öğeleri ID'ye göre bir haritaya çevir
-      const itemMap = new Map();
-      data[currentLocale].forEach((item: any) => {
-        itemMap.set(item.id, item);
-      });
-      
-      // Yeni sıralamaya göre diziyi oluştur
-      // Sadece mevcut ID'ler için
-      const reorderedItems = items
-        .map((id: string) => itemMap.get(id))
-        .filter(Boolean);
-      
-      // Sıralanmış öğeleri ekle
-      data[currentLocale] = reorderedItems;
-      
-      // Silinmiş olmayan ancak sıralamada gönderilmeyen öğeleri en sona ekle
-      data[currentLocale].forEach((item: any) => {
-        if (!items.includes(item.id)) {
-          reorderedItems.push(item);
-        }
-      });
-    });
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    // Her öğeyi sırayla güncelle
+    for (let i = 0; i < items.length; i++) {
+      await Carousel.findOneAndUpdate(
+        { id: items[i], locale },
+        { order: i }
+      );
+    }
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Carousel sıralaması başarıyla güncellendi'
+      message: 'Carousel sıralaması başarıyla güncellendi' 
     });
   } catch (error: any) {
     console.error('Carousel sıralama hatası:', error);
@@ -199,7 +207,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE metodu - carousel öğesini silmek için
+// Carousel öğesi sil
 export async function DELETE(request: Request) {
   // Kimlik doğrulama kontrolü
   const session = await getServerSession(authOptions);
@@ -212,9 +220,9 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    // URL'den ID parametresini al
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const locale = searchParams.get('locale') || 'en';
     
     if (!id) {
       return NextResponse.json(
@@ -223,36 +231,11 @@ export async function DELETE(request: Request) {
       );
     }
     
-    // JSON dosyasını oku
-    const fileContents = await fs.readFile(dataFilePath, 'utf8');
-    const data = JSON.parse(fileContents);
+    // MongoDB'ye bağlan
+    await connectToDatabase();
     
-    // Desteklenen tüm diller
-    const supportedLocales = ['en', 'bs'];
-    let isDeleted = false;
-    
-    // Tüm diller için silme işlemi yap
-    supportedLocales.forEach(locale => {
-      if (data[locale]) {
-        const initialLength = data[locale].length;
-        data[locale] = data[locale].filter((item: any) => item.id !== id);
-        
-        // En az bir dilde silindi mi kontrol et
-        if (data[locale].length < initialLength) {
-          isDeleted = true;
-        }
-      }
-    });
-    
-    if (!isDeleted) {
-      return NextResponse.json(
-        { error: 'Belirtilen ID\'ye sahip öğe bulunamadı' }, 
-        { status: 404 }
-      );
-    }
-    
-    // Dosyaya geri yaz
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2));
+    // Öğeyi sil
+    await Carousel.deleteOne({ id, locale });
     
     return NextResponse.json({ 
       success: true, 
