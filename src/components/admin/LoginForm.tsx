@@ -37,14 +37,30 @@ export default function LoginForm() {
       console.log('SignIn result:', result);
       
       if (result?.error) {
+        console.error('Login error from result:', result.error);
         setError('Invalid username or password');
         setIsLoading(false);
         return;
       }
       
-      // Success - redirect to dashboard
-      console.log('Login successful, redirecting to dashboard');
-      router.push('/admin/dashboard');
+      if (result?.ok) {
+        // Success - redirect to dashboard
+        console.log('Login successful, redirecting to dashboard with URL:', result.url);
+        
+        try {
+          // Use replace instead of push for cleaner history
+          await router.replace('/admin/dashboard');
+          console.log('Router replace completed');
+        } catch (routerError) {
+          console.error('Router error:', routerError);
+          // If router fails, try direct navigation
+          window.location.href = '/admin/dashboard';
+        }
+      } else {
+        console.error('Login was not successful but no error was returned');
+        setError('Authentication failed. Please try again.');
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('Login error:', error);
       setError('An unexpected error occurred. Please try again.');
