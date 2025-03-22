@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import path from 'path';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getAuthOptions } from '../auth/[...nextauth]/route';
 
 const dataFilePath = path.join(process.cwd(), 'data/json/activities.json');
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   // Kimlik doğrulama kontrolü
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json(
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
 // PUT metodu - aktivite sıralamasını güncellemek için
 export async function PUT(request: Request) {
   // Kimlik doğrulama kontrolü
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json(
@@ -207,7 +207,7 @@ export async function PUT(request: Request) {
 // DELETE metodu - aktivite öğesini silmek için
 export async function DELETE(request: Request) {
   // Kimlik doğrulama kontrolü
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   
   if (!session || session.user.role !== 'admin') {
     return NextResponse.json(

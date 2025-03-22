@@ -13,7 +13,8 @@ const users = [
   },
 ];
 
-export const authOptions: NextAuthOptions = {
+// Auth options - artık export edilmiyor, sadece dosya içinde kullanılıyor
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -86,5 +87,14 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',
 };
 
+// Next.js App Router için handler
 const handler = NextAuth(authOptions);
+
+// Sadece handler fonksiyonlarını export et
 export { handler as GET, handler as POST };
+
+// authOptions'ı başka dosyalarda kullanmak için bir yardımcı fonksiyon export et
+// Bu, direkt export yerine bir fonksiyon aracılığıyla erişim sağlar
+export function getAuthOptions() {
+  return authOptions;
+}

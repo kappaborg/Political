@@ -1,4 +1,4 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getAuthOptions } from '@/app/api/auth/[...nextauth]/route';
 import ActivitiesManager from '@/components/admin/ActivitiesManager';
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ActivitiesManagementPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   
   // Oturum yoksa veya admin değilse ana sayfaya yönlendir
   if (!session || session.user.role !== 'admin') {
