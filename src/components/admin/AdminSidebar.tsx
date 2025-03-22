@@ -1,96 +1,103 @@
 "use client";
 
-import { useTranslation } from '@/components/TranslationProvider';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { FiCalendar, FiFileText, FiHome, FiImage, FiSettings } from 'react-icons/fi';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { FiFileText, FiHome, FiLayers, FiSettings, FiX } from 'react-icons/fi';
 
-// Admin menüsü çevirileri için tip tanımları
-type AdminMenuKey = 'menu.dashboard' | 'menu.news' | 'menu.carousel' | 'menu.activities' | 'menu.settings';
-type AdminMenuTranslations = {
-  [locale in 'en' | 'bs']: {
-    [key in AdminMenuKey]: string;
-  }
+type Props = {
+  isSidebarOpen: boolean;
+  closeSidebar: () => void;
 };
 
-const adminMenuTranslations: AdminMenuTranslations = {
-  en: {
-    'menu.dashboard': 'Dashboard',
-    'menu.news': 'News',
-    'menu.carousel': 'Carousel',
-    'menu.activities': 'Activities',
-    'menu.settings': 'Settings'
-  },
-  bs: {
-    'menu.dashboard': 'Nadzorna ploča',
-    'menu.news': 'Vijesti',
-    'menu.carousel': 'Karusel',
-    'menu.activities': 'Aktivnosti',
-    'menu.settings': 'Postavke'
-  }
-};
-
-export default function AdminSidebar() {
+export default function AdminSidebar({ isSidebarOpen, closeSidebar }: Props) {
   const pathname = usePathname();
-  const { locale } = useTranslation();
-
-  // Admin menüsü için çeviriler
-  const t = (key: AdminMenuKey): string => {
-    return adminMenuTranslations[locale as 'en' | 'bs']?.[key] || adminMenuTranslations.en[key] || key;
-  };
-
-  const menuItems = [
+  const searchParams = useSearchParams();
+  const locale = searchParams.get('locale') || 'en';
+  
+  // Get current admin path without locale
+  const currentPath = pathname;
+  
+  // Navigation items
+  const navItems = [
     {
-      name: t('menu.dashboard'),
-      href: '/admin/dashboard',
-      icon: <FiHome className="mr-3 h-5 w-5" />
+      name: locale === 'en' ? 'Dashboard' : 'Gösterge Paneli',
+      href: '/admin',
+      icon: FiHome
     },
     {
-      name: t('menu.news'),
-      href: '/admin/dashboard/news',
-      icon: <FiFileText className="mr-3 h-5 w-5" />
+      name: locale === 'en' ? 'Carousel' : 'Slayt Gösterisi',
+      href: '/admin/carousel',
+      icon: FiLayers
     },
     {
-      name: t('menu.carousel'),
-      href: '/admin/dashboard/carousel',
-      icon: <FiImage className="mr-3 h-5 w-5" />
+      name: locale === 'en' ? 'News' : 'Haberler',
+      href: '/admin/news',
+      icon: FiFileText
     },
     {
-      name: t('menu.activities'),
-      href: '/admin/dashboard/activities',
-      icon: <FiCalendar className="mr-3 h-5 w-5" />
+      name: locale === 'en' ? 'Activities' : 'Etkinlikler',
+      href: '/admin/activities',
+      icon: FiLayers
     },
     {
-      name: t('menu.settings'),
-      href: '/admin/dashboard/settings',
-      icon: <FiSettings className="mr-3 h-5 w-5" />
+      name: locale === 'en' ? 'Settings' : 'Ayarlar',
+      href: '/admin/settings',
+      icon: FiSettings
     }
   ];
-
+  
+  // Function to check if a link is active
+  const isActive = (href: string) => {
+    if (href === '/admin') {
+      return currentPath === '/admin';
+    }
+    return currentPath.startsWith(href);
+  };
+  
+  // Generate full URL with locale parameter
+  const getFullUrl = (href: string) => {
+    return `${href}?locale=${locale}`;
+  };
+  
   return (
-    <aside className="w-64 min-h-[calc(100vh-4rem)] bg-white shadow-sm">
-      <nav className="mt-5 px-2">
-        <ul className="space-y-1">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <li key={item.name}>
-                <Link 
-                  href={`${item.href}?locale=${locale}`}
-                  className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
-                    isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  {item.icon}
-                  {item.name}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+    <div className={`
+      lg:block fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 
+      transform transition-transform duration-300 ease-in-out
+      ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    `}>
+      <div className="flex h-16 items-center justify-between lg:justify-center px-4 border-b border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800">
+          {locale === 'en' ? 'Admin Panel' : 'Yönetim Paneli'}
+        </h2>
+        <button
+          onClick={closeSidebar}
+          className="p-2 rounded-md text-gray-600 hover:bg-gray-100 lg:hidden"
+        >
+          <FiX className="h-5 w-5" />
+        </button>
+      </div>
+      
+      <nav className="mt-5 px-2 space-y-1">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={getFullUrl(item.href)}
+            className={`
+              group flex items-center px-3 py-2 text-sm font-medium rounded-md
+              ${isActive(item.href)
+                ? 'bg-blue-700 text-white'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              }
+            `}
+          >
+            <item.icon
+              className={`flex-shrink-0 mr-3 h-5 w-5 ${isActive(item.href) ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'}`}
+              aria-hidden="true"
+            />
+            {item.name}
+          </Link>
+        ))}
       </nav>
-    </aside>
+    </div>
   );
 } 

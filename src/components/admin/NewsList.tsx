@@ -1,8 +1,10 @@
 "use client";
 
+import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FiEdit, FiEye, FiTrash2 } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiEdit, FiEye, FiTrash } from 'react-icons/fi';
 
 type NewsItem = {
   id: string;
@@ -21,17 +23,39 @@ interface NewsListProps {
 }
 
 export default function NewsList({ newsItems, onEdit, onDelete }: NewsListProps) {
-  // Format the date to more readable format
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  
+  const handleDeleteClick = (id: string) => {
+    setConfirmId(id);
+  };
+  
+  const confirmDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/news?id=${id}`, { 
+        method: 'DELETE' 
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete news item');
+      }
+      
+      onDelete(id);
+    } catch (error) {
+      console.error('Delete error:', error);
+    } finally {
+      setConfirmId(null);
+    }
+  };
+  
+  const cancelDelete = () => {
+    setConfirmId(null);
   };
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-100">
             <tr>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Image
@@ -51,46 +75,73 @@ export default function NewsList({ newsItems, onEdit, onDelete }: NewsListProps)
             {newsItems.map((news) => (
               <tr key={news.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="relative h-12 w-20 rounded overflow-hidden">
-                    <Image 
-                      src={news.image} 
-                      alt={news.title} 
-                      fill
-                      sizes="80px"
-                      style={{ objectFit: 'cover' }} 
-                      className="rounded"
-                    />
-                  </div>
+                  {news.image ? (
+                    <div className="w-16 h-16 relative overflow-hidden rounded">
+                      <Image 
+                        src={news.image} 
+                        alt={news.title}
+                        layout="fill"
+                        objectFit="cover" 
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No image</span>
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{news.title}</div>
-                  <div className="text-sm text-gray-500 truncate max-w-md">{news.summary}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(news.date)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-3">
-                    <Link 
-                      href={`/news/${news.slug}`}
-                      className="text-indigo-600 hover:text-indigo-900 transition-colors" 
-                      target="_blank"
-                    >
-                      <FiEye className="w-5 h-5" />
-                    </Link>
-                    <button
-                      onClick={() => onEdit(news)}
-                      className="text-blue-600 hover:text-blue-900 transition-colors"
-                    >
-                      <FiEdit className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(news.id)}
-                      className="text-red-600 hover:text-red-900 transition-colors"
-                    >
-                      <FiTrash2 className="w-5 h-5" />
-                    </button>
+                  <div className="text-sm font-medium text-gray-900 line-clamp-2">
+                    {news.title}
                   </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">
+                    {format(new Date(news.date), 'MMM d, yyyy')}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {confirmId === news.id ? (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => confirmDelete(news.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        onClick={cancelDelete}
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex space-x-2">
+                      <Link 
+                        href={`/news/${news.slug}`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded"
+                        target="_blank"
+                        title="View"
+                      >
+                        <FiEye />
+                      </Link>
+                      <button
+                        onClick={() => onEdit(news)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded"
+                        title="Edit"
+                      >
+                        <FiEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(news.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-1 rounded"
+                        title="Delete"
+                      >
+                        <FiTrash />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -98,9 +149,9 @@ export default function NewsList({ newsItems, onEdit, onDelete }: NewsListProps)
         </table>
       </div>
       {newsItems.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No news articles found. Add your first one!</p>
-        </div>  
+        <div className="text-center py-12 bg-white rounded-lg shadow p-6">
+          <p className="text-gray-600">No news items found. Create your first one!</p>
+        </div>
       )}
     </div>
   );

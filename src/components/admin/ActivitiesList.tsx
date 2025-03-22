@@ -37,6 +37,7 @@ export default function ActivitiesList({
   locale = 'bs'
 }: ActivitiesListProps) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   // ID dizisi oluştur
   const getActivityIds = () => activities.map(activity => activity.id);
@@ -102,6 +103,46 @@ export default function ActivitiesList({
     }
   };
 
+  const handleDeleteClick = (id: string) => {
+    setConfirmId(id);
+  };
+  
+  const confirmDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/activities?id=${id}`, { 
+        method: 'DELETE' 
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete activity');
+      }
+      
+      onDeleteActivity(id);
+    } catch (error) {
+      console.error('Delete error:', error);
+    } finally {
+      setConfirmId(null);
+    }
+  };
+  
+  const cancelDelete = () => {
+    setConfirmId(null);
+  };
+
+  // Function to get status badge color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'upcoming':
+        return 'bg-blue-100 text-blue-800';
+      case 'past':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   if (activities.length === 0) {
     return (
       <div className="bg-white p-4 rounded shadow-md">
@@ -154,24 +195,43 @@ export default function ActivitiesList({
               </div>
               
               <div className="flex-shrink-0 flex flex-col gap-1 ml-2">
-                <button
-                  type="button"
-                  onClick={() => onEditActivity(activity)}
-                  disabled={isProcessing}
-                  className="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full"
-                  title={locale === 'en' ? 'Edit' : 'Düzenle'}
-                >
-                  <FiEdit size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDeleteActivity(activity.id)}
-                  disabled={isProcessing}
-                  className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
-                  title={locale === 'en' ? 'Delete' : 'Sil'}
-                >
-                  <FiTrash2 size={16} />
-                </button>
+                {confirmId === activity.id ? (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => confirmDelete(activity.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={cancelDelete}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => onEditActivity(activity)}
+                      disabled={isProcessing}
+                      className="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded"
+                      title={locale === 'en' ? 'Edit' : 'Düzenle'}
+                    >
+                      <FiEdit size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteClick(activity.id)}
+                      disabled={isProcessing}
+                      className="bg-red-600 hover:bg-red-700 text-white p-1 rounded"
+                      title={locale === 'en' ? 'Delete' : 'Sil'}
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
               
               <div className="flex-shrink-0 flex flex-col gap-1 ml-1">

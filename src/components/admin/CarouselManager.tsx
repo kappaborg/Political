@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { FiArrowDown, FiArrowUp, FiEdit2, FiPlus, FiSave, FiTrash2, FiX } from 'react-icons/fi';
+import { FiArrowDown, FiArrowUp, FiEdit2, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 type CarouselSlide = {
   id: string;
@@ -308,15 +308,17 @@ export default function CarouselManager() {
   // Render form for editing or creating
   if (isCreating || editingSlide) {
     return (
-      <form ref={formRef} onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-6">
-          {editingSlide ? 'Edit Carousel Slide' : 'Add New Slide'}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          {isCreating 
+            ? (locale === 'en' ? 'Add New Slide' : 'Yeni Slayt Ekle') 
+            : (locale === 'en' ? 'Edit Slide' : 'Slayt Düzenle')}
         </h2>
         
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-              Title
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              {locale === 'en' ? 'Title' : 'Başlık'}
             </label>
             <input
               type="text"
@@ -324,16 +326,17 @@ export default function CarouselManager() {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm focus:border-accent focus:ring-accent ${
-                errors.title ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
             />
-            {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+            )}
           </div>
           
           <div>
-            <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700">
-              Subtitle
+            <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700 mb-1">
+              {locale === 'en' ? 'Subtitle' : 'Alt Başlık'}
             </label>
             <input
               type="text"
@@ -341,101 +344,107 @@ export default function CarouselManager() {
               name="subtitle"
               value={formData.subtitle}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm focus:border-accent focus:ring-accent ${
-                errors.subtitle ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
-            {errors.subtitle && <p className="mt-1 text-sm text-red-600">{errors.subtitle}</p>}
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="buttonText" className="block text-sm font-medium text-gray-700">
-                Button Text (optional)
-              </label>
-              <input
-                type="text"
-                id="buttonText"
-                name="buttonText"
-                value={formData.buttonText}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="buttonLink" className="block text-sm font-medium text-gray-700">
-                Button Link
-              </label>
-              <input
-                type="text"
-                id="buttonLink"
-                name="buttonLink"
-                value={formData.buttonLink}
-                onChange={handleChange}
-                className={`mt-1 block w-full rounded-md shadow-sm focus:border-accent focus:ring-accent ${
-                  errors.buttonLink ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.buttonLink && <p className="mt-1 text-sm text-red-600">{errors.buttonLink}</p>}
-            </div>
+            {errors.subtitle && (
+              <p className="mt-1 text-sm text-red-600">{errors.subtitle}</p>
+            )}
           </div>
           
           <div>
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-              Background Image
+            <label htmlFor="buttonText" className="block text-sm font-medium text-gray-700 mb-1">
+              {locale === 'en' ? 'Button Text' : 'Buton Metni'}
             </label>
-            <div className="mt-2 flex items-start space-x-5">
-              <div className="relative h-32 w-56 rounded overflow-hidden border border-gray-300">
-                <Image 
-                  src={previewImage} 
-                  alt="Carousel slide preview" 
-                  fill
-                  style={{ objectFit: 'cover' }} 
-                />
-              </div>
-              <div>
+            <input
+              type="text"
+              id="buttonText"
+              name="buttonText"
+              value={formData.buttonText}
+              onChange={handleChange}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+            {errors.buttonText && (
+              <p className="mt-1 text-sm text-red-600">{errors.buttonText}</p>
+            )}
+          </div>
+          
+          <div>
+            <label htmlFor="buttonLink" className="block text-sm font-medium text-gray-700 mb-1">
+              {locale === 'en' ? 'Button Link' : 'Buton Bağlantısı'}
+            </label>
+            <input
+              type="text"
+              id="buttonLink"
+              name="buttonLink"
+              value={formData.buttonLink}
+              onChange={handleChange}
+              placeholder="https://..."
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+            {errors.buttonLink && (
+              <p className="mt-1 text-sm text-red-600">{errors.buttonLink}</p>
+            )}
+          </div>
+          
+          <div>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+              {locale === 'en' ? 'Image' : 'Görsel'}
+            </label>
+            <div className="flex items-start space-x-4">
+              {(formData.image || editingSlide?.image) && (
+                <div className="w-48 h-32 relative rounded overflow-hidden bg-gray-100">
+                  <Image
+                    src={formData.image || editingSlide?.image || ''}
+                    alt={formData.title}
+                    fill
+                    sizes="192px"
+                    style={{ objectFit: 'cover' }}
+                    className="rounded"
+                  />
+                </div>
+              )}
+              
+              <div className="flex-grow mt-2">
                 <input
                   type="file"
                   id="image"
                   name="image"
-                  ref={fileInputRef}
-                  accept="image/*"
                   onChange={handleImageChange}
-                  className="block text-sm text-gray-500
+                  accept="image/*"
+                  className="block w-full text-sm text-gray-700
                     file:mr-4 file:py-2 file:px-4
                     file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-accent file:text-white
-                    hover:file:bg-accent/90"
+                    file:text-sm file:font-medium
+                    file:bg-blue-600 file:text-white
+                    hover:file:bg-blue-700"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Recommended size: 1920×800 pixels
-                </p>
+                {errors.image && (
+                  <p className="mt-1 text-sm text-red-600">{errors.image}</p>
+                )}
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="mt-6 flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
-          >
-            <FiX className="mr-2 -ml-1 h-5 w-5" />
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50"
-          >
-            <FiSave className="mr-2 -ml-1 h-5 w-5" />
-            {isSubmitting ? 'Saving...' : 'Save Slide'}
-          </button>
-        </div>
-      </form>
+          
+          <div className="flex justify-end space-x-3 pt-3">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {locale === 'en' ? 'Cancel' : 'İptal'}
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {isSubmitting 
+                ? (locale === 'en' ? 'Saving...' : 'Kaydediliyor...') 
+                : (locale === 'en' ? 'Save Slide' : 'Slaytı Kaydet')}
+            </button>
+          </div>
+        </form>
+      </div>
     );
   }
 
@@ -445,7 +454,7 @@ export default function CarouselManager() {
       <div className="flex justify-end">
         <button
           onClick={handleStartCreate}
-          className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-md flex items-center space-x-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center space-x-2"
         >
           <FiPlus />
           <span>Add Slide</span>
@@ -458,84 +467,113 @@ export default function CarouselManager() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Image
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Title
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Subtitle
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {slides.map((slide, index) => (
-                  <tr key={slide.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="relative h-12 w-24 rounded overflow-hidden">
-                        <Image 
-                          src={slide.image} 
-                          alt={slide.title} 
-                          fill
-                          style={{ objectFit: 'cover' }} 
-                        />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{slide.title}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-500">{slide.subtitle}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => moveSlide(index, 'up')}
-                          disabled={index === 0}
-                          className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                          <FiArrowUp className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => moveSlide(index, 'down')}
-                          disabled={index === slides.length - 1}
-                          className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                          <FiArrowDown className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-3">
-                        <button
-                          onClick={() => handleStartEdit(slide)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <FiEdit2 className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(slide.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <FiTrash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </td>
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {locale === 'en' ? 'Carousel Slides' : 'Slayt Görselleri'}
+              </h2>
+              
+              {!isCreating && !editingSlide && (
+                <button
+                  onClick={() => setIsCreating(true)}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <FiPlus className="mr-2" />
+                  {locale === 'en' ? 'Add Slide' : 'Slayt Ekle'}
+                </button>
+              )}
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {locale === 'en' ? 'Image' : 'Görsel'}
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {locale === 'en' ? 'Title' : 'Başlık'}
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {locale === 'en' ? 'Subtitle' : 'Alt Başlık'}
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {locale === 'en' ? 'Order' : 'Sıra'}
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {locale === 'en' ? 'Actions' : 'İşlemler'}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {slides.map((slide, index) => (
+                    <tr key={slide.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="h-16 w-24 relative rounded overflow-hidden">
+                          <Image
+                            src={slide.image}
+                            alt={slide.title}
+                            fill
+                            sizes="96px"
+                            style={{ objectFit: 'cover' }}
+                            className="rounded"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{slide.title}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{slide.subtitle}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-900">{index + 1}</span>
+                          <div>
+                            <button
+                              onClick={() => moveSlide(index, 'up')}
+                              disabled={index === 0 || isSubmitting}
+                              className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30 disabled:hover:text-gray-500"
+                              title={locale === 'en' ? 'Move Up' : 'Yukarı Taşı'}
+                            >
+                              <FiArrowUp size={16} />
+                            </button>
+                            <button
+                              onClick={() => moveSlide(index, 'down')}
+                              disabled={index === slides.length - 1 || isSubmitting}
+                              className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30 disabled:hover:text-gray-500"
+                              title={locale === 'en' ? 'Move Down' : 'Aşağı Taşı'}
+                            >
+                              <FiArrowDown size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleStartEdit(slide)}
+                            disabled={isSubmitting}
+                            className="bg-blue-600 hover:bg-blue-700 text-white p-1.5 rounded"
+                            title={locale === 'en' ? 'Edit' : 'Düzenle'}
+                          >
+                            <FiEdit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(slide.id)}
+                            disabled={isSubmitting}
+                            className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded"
+                            title={locale === 'en' ? 'Delete' : 'Sil'}
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
