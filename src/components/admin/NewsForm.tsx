@@ -10,7 +10,7 @@ type NewsItem = {
   id: string;
   title: string;
   slug: string;
-  summary: string;
+  excerpt: string;
   content: string;
   image: string;
   date: string;
@@ -85,7 +85,7 @@ export default function NewsForm({ initialData, onSave, onCancel }: NewsFormProp
   const [formData, setFormData] = useState<Omit<NewsItem, 'id'> & { id?: string }>({
     title: '',
     slug: '',
-    summary: '',
+    excerpt: '',
     content: '',
     image: '/images/news-placeholder.jpg',
     date: new Date().toISOString().split('T')[0],
@@ -165,7 +165,7 @@ export default function NewsForm({ initialData, onSave, onCancel }: NewsFormProp
     
     if (!formData.title) newErrors.title = t('validation.title');
     if (!formData.slug) newErrors.slug = t('validation.slug');
-    if (!formData.summary) newErrors.summary = t('validation.summary');
+    if (!formData.excerpt) newErrors.excerpt = t('validation.summary');
     if (!formData.content) newErrors.content = t('validation.content');
     if (!formData.date) newErrors.date = t('validation.date');
     
@@ -192,7 +192,7 @@ export default function NewsForm({ initialData, onSave, onCancel }: NewsFormProp
       }
       apiFormData.append('title', formData.title);
       apiFormData.append('slug', formData.slug);
-      apiFormData.append('summary', formData.summary);
+      apiFormData.append('excerpt', formData.excerpt);
       apiFormData.append('content', formData.content);
       apiFormData.append('date', formData.date);
       
@@ -230,7 +230,7 @@ export default function NewsForm({ initialData, onSave, onCancel }: NewsFormProp
         id: result.data.id,
         title: result.data.title,
         slug: result.data.slug,
-        summary: result.data.excerpt, // API field name is different
+        excerpt: result.data.excerpt,
         content: result.data.content,
         image: result.data.image,
         date: result.data.date
@@ -305,20 +305,20 @@ export default function NewsForm({ initialData, onSave, onCancel }: NewsFormProp
         </div>
         
         <div>
-          <label htmlFor="summary" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700">
             {t('form.summary')}
           </label>
           <textarea
-            id="summary"
-            name="summary"
-            rows={2}
-            value={formData.summary}
+            id="excerpt"
+            name="excerpt"
+            value={formData.excerpt}
             onChange={handleChange}
+            rows={3}
             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-accent focus:ring-accent ${
-              errors.summary ? 'border-red-500' : 'border-gray-300'
+              errors.excerpt ? 'border-red-500' : 'border-gray-300'
             }`}
-          />
-          {errors.summary && <p className="mt-1 text-sm text-red-600">{errors.summary}</p>}
+          ></textarea>
+          {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>}
         </div>
         
         <div>

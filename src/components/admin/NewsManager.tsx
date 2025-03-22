@@ -10,7 +10,7 @@ type NewsItem = {
   id: string;
   slug: string;
   title: string;
-  summary: string;
+  excerpt: string;
   content: string;
   image: string;
   date: string;
@@ -35,14 +35,7 @@ export default function NewsManager() {
         }
         
         const data = await response.json();
-        
-        // API'den gelen veriyi dönüştür
-        const formattedNews = data.map((item: any) => ({
-          ...item,
-          summary: item.excerpt // excerpt -> summary dönüşümü
-        }));
-        
-        setNewsItems(formattedNews);
+        setNewsItems(data);
       } catch (error) {
         console.error('News fetch error:', error);
       } finally {
@@ -54,10 +47,7 @@ export default function NewsManager() {
   }, [locale]);
   
   const handleEdit = (newsItem: NewsItem) => {
-    setEditingItem({
-      ...newsItem,
-      summary: newsItem.excerpt // excerpt -> summary dönüşümü
-    });
+    setEditingItem(newsItem);
   };
   
   const handleCancel = () => {
@@ -73,18 +63,12 @@ export default function NewsManager() {
     if (editingItem) {
       // Update existing item
       setNewsItems(newsItems.map(item => 
-        item.id === savedItem.id ? {
-          ...savedItem,
-          excerpt: savedItem.summary // summary -> excerpt dönüşümü
-        } : item
+        item.id === savedItem.id ? savedItem : item
       ));
       setEditingItem(null);
     } else {
       // Add new item
-      setNewsItems([{
-        ...savedItem,
-        excerpt: savedItem.summary // summary -> excerpt dönüşümü
-      }, ...newsItems]);
+      setNewsItems([savedItem, ...newsItems]);
       setIsCreating(false);
     }
   };
