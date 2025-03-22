@@ -186,49 +186,94 @@ const translations = {
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  const [locale, setLocaleState] = useState<Locale>('bs');
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    const savedLocale = localStorage.getItem('locale') as Locale;
-    if (savedLocale && (savedLocale === 'en' || savedLocale === 'bs')) {
-      setLocaleState(savedLocale);
+    try {
+      if (typeof window !== 'undefined') {
+        const savedLocale = localStorage.getItem('locale') as Locale;
+        if (savedLocale && (savedLocale === 'en' || savedLocale === 'bs')) {
+          setLocaleState(savedLocale);
+        } else {
+          // Default to Bosnian if no valid locale is stored
+          setLocaleState('bs');
+          localStorage.setItem('locale', 'bs');
+        }
+      }
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
+      // Default to Bosnian on error
+      setLocaleState('bs');
     }
   }, []);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem('locale', newLocale);
-  };
-
-  const t = (key: string): any => {
-    if (key.includes('.')) {
-      const parts = key.split('.');
-      let value: any = translations[locale];
-      
-      for (const part of parts) {
-        if (!value || typeof value !== 'object') {
-          return key;
-        }
-        value = value[part];
-        if (value === undefined) {
-          return key;
-        }
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('locale', newLocale);
       }
-      
-      return value;
-    } else {
-      const value = translations[locale][key as keyof typeof translations[typeof locale]];
-      return value !== undefined ? value : key;
+    } catch (error) {
+      console.error('Error setting locale in localStorage:', error);
     }
   };
 
-  // Only render content once we're on the client to avoid hydration mismatch
+  const t = (key: string): any => {
+    // Default language translations
+    const defaultTranslations = translations['bs'];
+    
+    // For debugging
+    // console.log(`Translating key: ${key}, current locale: ${locale}`);
+    
+    if (key.includes('.')) {
+      const parts = key.split('.');
+      let value: any = translations[locale];
+      let defaultValue: any = defaultTranslations;
+      
+      for (const part of parts) {
+        if (!value || typeof value !== 'object') {
+          // Try to get from default language
+          for (const defaultPart of parts) {
+            if (!defaultValue || typeof defaultValue !== 'object') {
+              // console.warn(`Translation key not found: ${key}`);
+              return key;
+            }
+            defaultValue = defaultValue[defaultPart];
+          }
+          return defaultValue !== undefined ? defaultValue : key;
+        }
+        value = value[part];
+      }
+      
+      return value !== undefined ? value : key;
+    } else {
+      const value = translations[locale][key as keyof typeof translations[typeof locale]];
+      if (value === undefined) {
+        const defaultValue = defaultTranslations[key as keyof typeof defaultTranslations];
+        return defaultValue !== undefined ? defaultValue : key;
+      }
+      return value;
+    }
+  };
+
+  // Use React's suspense boundary to prevent hydration mismatch
+  if (typeof window === 'undefined') {
+    // Server-side rendering - use default locale
+    return (
+      <TranslationContext.Provider value={{ locale: 'bs', setLocale, t }}>
+        {children}
+      </TranslationContext.Provider>
+    );
+  }
+
+  // When it's server-side or hydration isn't complete, return just the Provider
   if (!isClient) {
     return null;
   }
 
+  // Client-side with hydration complete
   return (
     <TranslationContext.Provider value={{ locale, setLocale, t }}>
       {children}
