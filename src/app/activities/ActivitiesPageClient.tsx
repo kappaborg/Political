@@ -110,7 +110,7 @@ export default function ActivitiesPageClient() {
       transition={{ duration: 0.3, delay: index * 0.05 }}
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full"
     >
-      <Link href={`/activities/${activity.slug}`} className="block h-full flex flex-col">
+      <Link href={`/activities/${activity.slug}`} className="flex flex-col h-full">
         <div className="relative h-48 w-full flex-shrink-0">
           {/* Düşük kaliteli placeholder */}
           <div 
