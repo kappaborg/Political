@@ -58,6 +58,9 @@ export async function generateMetadata(
   };
 }
 
-export default function ActivityDetailPage({ params }: { params: { slug: string } }) {
+export default async function ActivityDetailPage({ params }: { params: { slug: string } }) {
+  // Sayfa yüklenmeden önce aktivitenin varlığını kontrol edin
+  const activity = await getActivity(params.slug);
+  
   return <ActivityDetailClient slug={params.slug} />;
 } 

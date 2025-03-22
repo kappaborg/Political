@@ -13,8 +13,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  // getNewsItemBySlug fonksiyonu bulunamadığı için getNewsBySlug ile değiştirdim
-  const newsItem = getNewsBySlug(params.slug);
+  // Promise'i await ile bekliyoruz
+  const newsItem = await getNewsBySlug(params.slug);
   
   if (!newsItem) {
     return {
@@ -29,9 +29,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 // Server Component that wraps client component
-export default function NewsPage({ params }: { params: { slug: string } }) {
-  // Server tarafında ön kontrol yapıyoruz
-  const newsItem = getNewsBySlug(params.slug);
+export default async function NewsPage({ params }: { params: { slug: string } }) {
+  // Server tarafında ön kontrol yapıyoruz - Promise'i await ile bekliyoruz
+  const newsItem = await getNewsBySlug(params.slug);
   
   // Eğer haber bulunamazsa 404 sayfasına yönlendir
   if (!newsItem) {
