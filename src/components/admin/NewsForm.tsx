@@ -22,8 +22,22 @@ interface NewsFormProps {
   onCancel: () => void;
 }
 
+// Form çevirileri için tip tanımları
+type FormTranslationKey = 
+  | 'form.editTitle' | 'form.addTitle' | 'form.title' | 'form.slug' 
+  | 'form.slugHelp' | 'form.date' | 'form.summary' | 'form.content' 
+  | 'form.image' | 'form.imageHelp' | 'form.cancel' | 'form.saving' 
+  | 'form.save' | 'validation.title' | 'validation.slug' | 'validation.summary' 
+  | 'validation.content' | 'validation.date';
+
+type FormTranslations = {
+  [locale in 'en' | 'bs']: {
+    [key in FormTranslationKey]: string;
+  }
+};
+
 // Formda kullanılacak çeviriler
-const formTranslations = {
+const formTranslations: FormTranslations = {
   en: {
     'form.editTitle': 'Edit News Article',
     'form.addTitle': 'Add New Article',
@@ -83,7 +97,7 @@ export default function NewsForm({ initialData, onSave, onCancel }: NewsFormProp
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Çeviri fonksiyonu
-  const t = (key: string): string => {
+  const t = (key: FormTranslationKey): string => {
     return formTranslations[locale as 'en' | 'bs']?.[key] || formTranslations.en[key] || key;
   };
 

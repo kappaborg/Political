@@ -5,7 +5,15 @@ import { useTranslation } from '@/components/TranslationProvider';
 import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
 
-const adminTranslations = {
+// Admin çevirileri için tip tanımları
+type AdminTranslationKey = 'admin.title' | 'admin.signedInAs' | 'admin.signOut';
+type AdminTranslations = {
+  [locale in 'en' | 'bs']: {
+    [key in AdminTranslationKey]: string;
+  }
+};
+
+const adminTranslations: AdminTranslations = {
   en: {
     'admin.title': 'Municipality Admin',
     'admin.signedInAs': 'Signed in as',
@@ -24,7 +32,7 @@ export default function AdminHeader() {
   const { locale } = useTranslation();
 
   // Admin paneli için çeviriler
-  const t = (key: string): string => {
+  const t = (key: AdminTranslationKey): string => {
     return adminTranslations[locale as 'en' | 'bs']?.[key] || adminTranslations.en[key] || key;
   };
 

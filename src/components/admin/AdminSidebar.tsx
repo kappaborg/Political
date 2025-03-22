@@ -5,7 +5,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiCalendar, FiFileText, FiHome, FiImage, FiSettings } from 'react-icons/fi';
 
-const adminMenuTranslations = {
+// Admin menüsü çevirileri için tip tanımları
+type AdminMenuKey = 'menu.dashboard' | 'menu.news' | 'menu.carousel' | 'menu.activities' | 'menu.settings';
+type AdminMenuTranslations = {
+  [locale in 'en' | 'bs']: {
+    [key in AdminMenuKey]: string;
+  }
+};
+
+const adminMenuTranslations: AdminMenuTranslations = {
   en: {
     'menu.dashboard': 'Dashboard',
     'menu.news': 'News',
@@ -27,7 +35,7 @@ export default function AdminSidebar() {
   const { locale } = useTranslation();
 
   // Admin menüsü için çeviriler
-  const t = (key: string): string => {
+  const t = (key: AdminMenuKey): string => {
     return adminMenuTranslations[locale as 'en' | 'bs']?.[key] || adminMenuTranslations.en[key] || key;
   };
 
