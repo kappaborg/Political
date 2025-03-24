@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://username:password@cluster.mongodb.net/municipality?retryWrites=true&w=majority';
+if (!process.env.MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+}
+
+const MONGODB_URI = process.env.MONGODB_URI;
 
 interface CachedConnection {
-  conn: any;
-  promise: Promise<any> | null;
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
 
 declare global {
@@ -21,21 +25,26 @@ if (!global.mongoose) {
 
 export async function connectToDatabase() {
   if (cached.conn) {
+    console.log('Using cached MongoDB connection');
     return cached.conn;
   }
 
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts)
-      .then((mongooseInstance) => {
-        console.log('Connected to MongoDB');
-        return mongooseInstance;
+      .then((mongoose) => {
+        console.log('New MongoDB connection established');
+        return mongoose;
       })
-      .catch((error: Error) => {
+      .catch((error) => {
         console.error('MongoDB connection error:', error);
+        cached.promise = null;
         throw error;
       });
   }

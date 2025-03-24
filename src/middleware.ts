@@ -12,43 +12,43 @@ export async function middleware(request: NextRequest) {
   // Check all cookies to debug
   console.log('Cookies:', request.cookies.getAll().map(c => `${c.name}=${c.value}`));
   
-  // Admin sayfalarını koru
-  if (pathname.startsWith('/admin') && !pathname.includes('/admin/login')) {
-    console.log('Protecting admin path:', pathname);
-    
+  // Admin sayfaları ve API'leri için koruma
+  if ((pathname.startsWith('/admin') && !pathname.includes('/admin/login')) || 
+      (pathname.startsWith('/api/') && request.method !== 'GET')) {
     try {
-      // Try to get token with explicit options
       const token = await getToken({ 
         req: request, 
-        secret: process.env.NEXTAUTH_SECRET || "emina-web-jwt-secret-key-with-minimum-32-chars", 
-        secureCookie: process.env.NODE_ENV === 'production',
-        cookieName: 'next-auth.session-token'
+        secret: process.env.NEXTAUTH_SECRET,
+        secureCookie: process.env.NODE_ENV === 'production'
       });
-      
-      console.log('Auth token obtained:', token);
 
-      // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
       if (!token) {
-        console.log('No token found, redirecting to login');
+        if (pathname.startsWith('/api/')) {
+          return NextResponse.json(
+            { error: 'Unauthorized' },
+            { status: 401 }
+          );
+        }
         const loginUrl = new URL('/admin/login', request.url);
-        console.log('Redirecting to:', loginUrl.toString());
         return NextResponse.redirect(loginUrl);
       }
 
-      // Admin rolü kontrolü
       if (token.role !== 'admin') {
-        console.log('User is not admin, role:', token.role);
+        if (pathname.startsWith('/api/')) {
+          return NextResponse.json(
+            { error: 'Unauthorized' },
+            { status: 401 }
+          );
+        }
         const loginUrl = new URL('/admin/login', request.url);
-        console.log('Redirecting to:', loginUrl.toString());
         return NextResponse.redirect(loginUrl);
       }
-      
-      console.log('Access granted to admin path for user:', token.username);
     } catch (error) {
       console.error('Error in auth middleware:', error);
-      // On error, still allow access for debugging
-      console.log('Error occurred, but allowing access for debugging');
-      return NextResponse.next();
+      return NextResponse.json(
+        { error: 'Internal Server Error' },
+        { status: 500 }
+      );
     }
   }
 
@@ -59,6 +59,7 @@ export async function middleware(request: NextRequest) {
 // Hangi isteklerin middleware'den geçeceğini belirt
 export const config = {
   matcher: [
-    '/admin/:path*', // Tüm admin altındaki sayfalar
+    '/admin/:path*',
+    '/api/:path*'
   ],
 }; 
