@@ -17,12 +17,12 @@ type NewsItem = {
 };
 
 interface NewsListProps {
-  newsItems: NewsItem[];
+  items: NewsItem[];
   onEdit: (news: NewsItem) => void;
   onDelete: (id: string) => void;
 }
 
-export default function NewsList({ newsItems, onEdit, onDelete }: NewsListProps) {
+export default function NewsList({ items, onEdit, onDelete }: NewsListProps) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   
   const handleDeleteClick = (id: string) => {
@@ -72,7 +72,7 @@ export default function NewsList({ newsItems, onEdit, onDelete }: NewsListProps)
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {newsItems.map((news) => (
+            {items.map((news) => (
               <tr key={news.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   {news.image ? (
@@ -148,7 +148,7 @@ export default function NewsList({ newsItems, onEdit, onDelete }: NewsListProps)
           </tbody>
         </table>
       </div>
-      {newsItems.length === 0 && (
+      {items.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg shadow p-6">
           <p className="text-gray-600">No news items found. Create your first one!</p>
         </div>
