@@ -26,27 +26,27 @@ export async function middleware(request: NextRequest) {
       if (!token) {
         if (pathname.startsWith('/api/')) {
           return NextResponse.json(
-            { error: 'Unauthorized' },
+            { error: 'Authentication required', message: 'Please log in to access this resource' },
             { status: 401 }
           );
         }
-        // Use nextUrl instead of URL constructor for more reliability
-        const url = request.nextUrl.clone();
-        url.pathname = '/admin/login';
-        return NextResponse.redirect(url);
+        
+        const loginUrl = new URL('/admin/login', request.url);
+        // Preserve the original URL as returnUrl
+        loginUrl.searchParams.set('returnUrl', request.url);
+        return NextResponse.redirect(loginUrl);
       }
 
       if (token.role !== 'admin') {
         if (pathname.startsWith('/api/')) {
           return NextResponse.json(
-            { error: 'Unauthorized' },
-            { status: 401 }
+            { error: 'Permission denied', message: 'Admin access required' },
+            { status: 403 }
           );
         }
-        // Use nextUrl instead of URL constructor for more reliability
-        const url = request.nextUrl.clone();
-        url.pathname = '/admin/login';
-        return NextResponse.redirect(url);
+        
+        const loginUrl = new URL('/admin/login', request.url);
+        return NextResponse.redirect(loginUrl);
       }
     } catch (error) {
       console.error('Error in auth middleware:', error);

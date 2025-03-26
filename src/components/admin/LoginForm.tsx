@@ -31,14 +31,18 @@ export default function LoginForm() {
         redirect: false,
         username,
         password,
-        callbackUrl: '/admin/dashboard'
+        callbackUrl: process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/admin/dashboard` : '/admin/dashboard'
       });
       
       console.log('SignIn result:', result);
       
       if (result?.error) {
         console.error('Login error from result:', result.error);
-        setError('Invalid username or password');
+        if (result.error === 'CredentialsSignin') {
+          setError('Invalid username or password');
+        } else {
+          setError('Authentication failed. Please try again.');
+        }
         setIsLoading(false);
         return;
       }
