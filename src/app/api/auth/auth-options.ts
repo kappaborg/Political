@@ -13,9 +13,13 @@ const users = [
 ];
 
 // For debugging
-console.log('Auth options loaded, NODE_ENV:', process.env.NODE_ENV);
-console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
-console.log('NEXTAUTH_SECRET present:', !!process.env.NEXTAUTH_SECRET);
+const debug = process.env.NODE_ENV === 'development';
+
+if (debug) {
+  console.log('Auth options loaded, NODE_ENV:', process.env.NODE_ENV);
+  console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+  console.log('NEXTAUTH_SECRET present:', !!process.env.NEXTAUTH_SECRET);
+}
 
 // Auth options
 export const authOptions: AuthOptions = {
@@ -26,22 +30,45 @@ export const authOptions: AuthOptions = {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) {
-          throw new Error('Missing credentials');
-        }
+      async authorize(credentials, req) {
+        try {
+          if (debug) {
+            console.log('Authorize called with credentials:', {
+              username: credentials?.username,
+              hasPassword: !!credentials?.password
+            });
+          }
 
-        // Demo credentials check
-        if (credentials.username === 'admin' && credentials.password === 'password123') {
-          return {
-            id: '1',
-            name: 'Admin User',
-            email: 'admin@example.com',
-            username: 'admin',
-            role: 'admin'
-          };
+          if (!credentials?.username || !credentials?.password) {
+            throw new Error('Missing credentials');
+          }
+
+          // Demo credentials check
+          if (credentials.username === 'admin' && credentials.password === 'password123') {
+            const user = {
+              id: '1',
+              name: 'Admin User',
+              email: 'admin@example.com',
+              username: 'admin',
+              role: 'admin'
+            };
+            
+            if (debug) {
+              console.log('User authenticated:', user);
+            }
+            
+            return user;
+          }
+
+          if (debug) {
+            console.log('Invalid credentials provided');
+          }
+          
+          return null;
+        } catch (error) {
+          console.error('Auth error:', error);
+          throw error;
         }
-        return null;
       }
     })
   ],
@@ -70,4 +97,5 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24 hours
   },
+  debug: process.env.NODE_ENV === 'development',
 }; 

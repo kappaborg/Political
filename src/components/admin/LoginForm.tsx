@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { FiAlertCircle, FiLock, FiUser } from 'react-icons/fi';
 
@@ -12,6 +12,8 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/admin/dashboard';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,13 +27,13 @@ export default function LoginForm() {
       setIsLoading(true);
       setError(null);
       
-      console.log('Signing in with credentials:', { username, password });
+      console.log('Signing in with credentials:', { username });
       
       const result = await signIn('credentials', {
         redirect: false,
         username,
         password,
-        callbackUrl: process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/admin/dashboard` : '/admin/dashboard'
+        callbackUrl
       });
       
       console.log('SignIn result:', result);
@@ -49,15 +51,15 @@ export default function LoginForm() {
       
       if (result?.ok) {
         // Success - redirect to dashboard
-        console.log('Login successful, redirecting to dashboard');
+        console.log('Login successful, redirecting to:', callbackUrl);
         
         try {
           // Use replace instead of push for cleaner history
-          router.replace('/admin/dashboard');
+          router.replace(callbackUrl);
         } catch (routerError) {
           console.error('Router error:', routerError);
           // If router fails, try direct navigation
-          window.location.href = '/admin/dashboard';
+          window.location.href = callbackUrl;
         }
       } else {
         console.error('Login was not successful but no error was returned');
