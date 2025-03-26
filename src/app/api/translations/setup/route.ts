@@ -1,11 +1,12 @@
 import connectToDatabase from '@/lib/mongodb';
 import Translation from '@/models/Translation';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const setupSecret = searchParams.get('secret');
+    const setupSecret = request.nextUrl.searchParams.get('secret');
     
     if (!setupSecret || setupSecret !== process.env.SETUP_SECRET) {
       return NextResponse.json(

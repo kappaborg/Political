@@ -6,11 +6,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   console.log('Middleware running for path:', pathname);
-  console.log('Request URL:', request.url);
-  console.log('Request headers:', JSON.stringify(Array.from(request.headers.entries())));
-  
-  // Check all cookies to debug
-  console.log('Cookies:', request.cookies.getAll().map(c => `${c.name}=${c.value}`));
+  // Minimize excessive logging in production
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Request URL:', request.url);
+    console.log('Request headers:', JSON.stringify(Array.from(request.headers.entries())));
+    console.log('Cookies:', request.cookies.getAll().map(c => `${c.name}=${c.value}`));
+  }
   
   // Admin sayfaları ve API'leri için koruma
   if ((pathname.startsWith('/admin') && !pathname.includes('/admin/login')) || 
@@ -29,8 +30,10 @@ export async function middleware(request: NextRequest) {
             { status: 401 }
           );
         }
-        const loginUrl = new URL('/admin/login', request.url);
-        return NextResponse.redirect(loginUrl);
+        // Use nextUrl instead of URL constructor for more reliability
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/login';
+        return NextResponse.redirect(url);
       }
 
       if (token.role !== 'admin') {
@@ -40,8 +43,10 @@ export async function middleware(request: NextRequest) {
             { status: 401 }
           );
         }
-        const loginUrl = new URL('/admin/login', request.url);
-        return NextResponse.redirect(loginUrl);
+        // Use nextUrl instead of URL constructor for more reliability
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/login';
+        return NextResponse.redirect(url);
       }
     } catch (error) {
       console.error('Error in auth middleware:', error);
@@ -52,7 +57,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  console.log('Middleware completed for path:', pathname);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Middleware completed for path:', pathname);
+  }
   return NextResponse.next();
 }
 

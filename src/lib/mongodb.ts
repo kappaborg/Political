@@ -1,62 +1,56 @@
 import mongoose from 'mongoose';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+// Track connection status to avoid multiple connection attempts
+interface MongoConnectionStatus {
+  isConnected?: number;
+  connectionPromise?: Promise<typeof mongoose>;
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const connection: MongoConnectionStatus = {};
 
-interface CachedConnection {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
-declare global {
-  var mongoose: CachedConnection | undefined;
-}
-
-// Varsayılan initial değer ile başlatıyoruz
-let cached: CachedConnection = global.mongoose || { conn: null, promise: null };
-
-// Global değişkene atama yapıyoruz
-if (!global.mongoose) {
-  global.mongoose = cached;
-}
-
-export async function connectToDatabase() {
-  if (cached.conn) {
-    console.log('Using cached MongoDB connection');
-    return cached.conn;
+async function connectToDatabase(): Promise<typeof mongoose> {
+  // If we're already connected, return the existing connection
+  if (connection.isConnected) {
+    console.log('Using existing MongoDB connection');
+    return mongoose;
   }
 
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    };
+  // If a connection attempt is already in progress, return that promise
+  if (connection.connectionPromise) {
+    return connection.connectionPromise;
+  }
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts)
-      .then((mongoose) => {
-        console.log('New MongoDB connection established');
-        return mongoose;
-      })
-      .catch((error) => {
-        console.error('MongoDB connection error:', error);
-        cached.promise = null;
-        throw error;
-      });
+  // Validate env var presence
+  if (!process.env.MONGODB_URI) {
+    throw new Error('Please define the MONGODB_URI environment variable');
   }
 
   try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
+    // Create a new connection promise
+    connection.connectionPromise = mongoose.connect(process.env.MONGODB_URI, {
+      // MongoDB connection options
+      // The typings expect serverApi but mongoose handles this internally
+    });
 
-  return cached.conn;
+    // Wait for the connection to be established
+    const db = await connection.connectionPromise;
+    
+    // Set the connection status
+    connection.isConnected = db.connections[0].readyState;
+    console.log('MongoDB connected successfully');
+    
+    // Remove the connection promise to allow new connection attempts if needed
+    connection.connectionPromise = undefined;
+    
+    return db;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    
+    // Clear connection promise to allow retry attempts
+    connection.connectionPromise = undefined;
+    
+    throw error;
+  }
 }
 
 export default connectToDatabase; 

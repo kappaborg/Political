@@ -19,10 +19,26 @@ export function useTranslation() {
   return context;
 }
 
+// Default fallback translations to prevent UI showing raw keys
+const fallbackTranslations: Record<string, Record<string, string>> = {
+  en: {
+    'general.loading': 'Loading...',
+    'general.error': 'Error',
+    'general.retry': 'Retry'
+  },
+  bs: {
+    'general.loading': 'Učitavanje...',
+    'general.error': 'Greška',
+    'general.retry': 'Pokušaj ponovo'
+  }
+};
+
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState('bs');
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale');
@@ -35,22 +51,49 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     const fetchTranslations = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/translations?locale=${locale}`);
+        
+        // Use a timeout to prevent infinite hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        // Use our safe URL builder to prevent URL construction errors
+        const url = `/api/translations?locale=${locale}`;
+        
+        const response = await fetch(url, { 
+          signal: controller.signal,
+          cache: 'no-cache' // Prevent stale cache issues
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch translations');
+          throw new Error(`Failed to fetch translations: ${response.status}`);
         }
+        
         const data = await response.json();
         setTranslations(data);
+        setRetryCount(0); // Reset retry count on success
       } catch (error) {
         console.error('Error fetching translations:', error);
-        setTranslations({});
+        
+        // Load fallback translations for the current locale
+        const fallback = fallbackTranslations[locale as 'en' | 'bs'] || fallbackTranslations.en;
+        setTranslations(fallback);
+        
+        // Retry logic for network errors
+        if (retryCount < maxRetries) {
+          console.log(`Retrying translation fetch (${retryCount + 1}/${maxRetries})...`);
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+          }, 1000 * (retryCount + 1)); // Exponential backoff
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchTranslations();
-  }, [locale]);
+  }, [locale, retryCount]);
 
   const setLocale = (newLocale: string) => {
     localStorage.setItem('locale', newLocale);

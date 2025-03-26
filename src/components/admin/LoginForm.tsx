@@ -45,12 +45,11 @@ export default function LoginForm() {
       
       if (result?.ok) {
         // Success - redirect to dashboard
-        console.log('Login successful, redirecting to dashboard with URL:', result.url);
+        console.log('Login successful, redirecting to dashboard');
         
         try {
           // Use replace instead of push for cleaner history
-          await router.replace('/admin/dashboard');
-          console.log('Router replace completed');
+          router.replace('/admin/dashboard');
         } catch (routerError) {
           console.error('Router error:', routerError);
           // If router fails, try direct navigation

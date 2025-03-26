@@ -1,13 +1,14 @@
 import connectToDatabase from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { authOptions } from '../auth/auth-options';
 
-export async function GET(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const locale = searchParams.get('locale') || 'en';
+    const locale = request.nextUrl.searchParams.get('locale') || 'en';
     
     await connectToDatabase();
     
